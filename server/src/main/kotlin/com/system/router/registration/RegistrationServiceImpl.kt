@@ -13,7 +13,7 @@ class RegistrationServiceImpl(
     override fun createNewUser(registrationNewUserDTO: RegistrationNewUserDTO): RegistrationResult<Unit> {
         val otp = generateOTP()
 
-        val response =  responseRepository.createUser(
+        val response = responseRepository.createUser(
             RegistrationTableDTO(
                 firstName = registrationNewUserDTO.firstName,
                 lastName = registrationNewUserDTO.lastName,
@@ -25,7 +25,11 @@ class RegistrationServiceImpl(
         )
 
         if (response is RegistrationResult.Success) {
-            val send = sendOTP(registrationNewUserDTO.emailAddress, otp.second)
+            val send = sendOTP(
+                registrationNewUserDTO.userName,
+                registrationNewUserDTO.emailAddress,
+                otp.second
+            )
 
             if (!send) {
                 return RegistrationResult.Error(
@@ -49,21 +53,27 @@ class RegistrationServiceImpl(
         val hashOTP = digest.digest(otp.toByteArray())
             .joinToString("") { "%02x".format(it) }
 
-        return Pair(hashOTP ,otp)
+        return Pair(hashOTP, otp)
     }
 
-    override fun sendOTP(email: String, otp: String) : Boolean {
+    override fun sendOTP(userName: String, email: String, otp: String): Boolean {
         val resendKey = LoadEnv.getResendKey()
+        var otpTemplate = LoadEnv.getOTPTemplate()
 
-        if (resendKey != null) {
+        if (resendKey != null && otpTemplate != null) {
 
             val resend = Resend(resendKey)
 
+            otpTemplate = otpTemplate
+                .replace("{{firstName}}", userName)
+                .replace("{{otpCode}}", otp)
+                .replace("{{emailAddress}}", email)
+
             val params = CreateEmailOptions.builder()
-                .from("Acme <split-the-bill@splitthebill.rajindawanigasingha.com>")
+                .from("split-the-bill <split-the-bill@splitthebill.rajindawanigasingha.com>")
                 .to(email)
-                .subject("Registration OTP")
-                .html("<p>${otp}</p>")
+                .subject("Split The Bill Registration OTP")
+                .html(otpTemplate)
                 .build()
 
             runCatching {

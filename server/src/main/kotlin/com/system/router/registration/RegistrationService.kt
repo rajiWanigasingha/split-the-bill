@@ -6,7 +6,7 @@ interface RegistrationService {
 
     fun generateOTP() : Pair<String , String>
 
-    fun sendOTP(email: String, otp: String) : Boolean
+    fun sendOTP(userName: String, email: String, otp: String) : Boolean
 
     fun validateOTP()
 
