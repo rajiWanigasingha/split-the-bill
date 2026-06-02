@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.system.screen.registration.components.FirstNameComponent
+import com.system.screen.registration.components.LastNameComponent
+import com.system.screen.registration.components.UserNameComponent
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
@@ -49,13 +54,39 @@ import split_the_bill.app.shared.generated.resources.close
 
 @Composable
 fun BasicInformationPage(
+    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
     nextPage: () -> Unit
 ) {
+
+    val basicInformationState by registrationScreenViewModel.basicInformationPageState.collectAsState()
+
     var firstName by remember { mutableStateOf("") }
+    var firstNameError by remember { mutableStateOf<String?>(null) }
     var lastName by remember { mutableStateOf("") }
+    var lastNameError by remember { mutableStateOf<String?>(null) }
     var userName by remember { mutableStateOf("") }
+    var userNameError by remember { mutableStateOf<String?>(null) }
 
     val focusManager = LocalFocusManager.current
+
+    when (basicInformationState) {
+        is BasicInformationPage.CollectedBasicInformation -> {
+            firstNameError = null
+            lastNameError = null
+            userNameError = null
+        }
+        is BasicInformationPage.CollectedValidationError -> {
+            val error = (basicInformationState as BasicInformationPage.CollectedValidationError).data
+            firstNameError = error.firstName
+            lastNameError = error.lastName
+            userNameError = error.userName
+        }
+        is BasicInformationPage.Init -> {
+            firstNameError = null
+            lastNameError = null
+            userNameError = null
+        }
+    }
 
     Scaffold {
         Box(
@@ -96,36 +127,15 @@ fun BasicInformationPage(
                 }
 
                 item {
-                    var isFocused by remember { mutableStateOf(false) }
-                    OutlinedTextField(
-                        value = firstName,
-                        onValueChange = { firstName = it },
-                        label = { Text("First Name") },
-                        supportingText = { Text("Enter your first name") },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.firstname),
-                                contentDescription = "fistName",
-                                modifier = Modifier.size(20.dp)
-                            )
+                    FirstNameComponent(
+                        firstName = firstName,
+                        onFirstNameChange = {
+                            firstName = it
                         },
-                        trailingIcon = {
-                            if (isFocused && firstName.isNotEmpty()) {
-                                IconButton(onClick = { firstName = "" }) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.close),
-                                        contentDescription = "close",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
+                        onFirstNameClear = {
+                            firstName = ""
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        singleLine = true
+                        errorMessage = firstNameError
                     )
                 }
 
@@ -134,34 +144,15 @@ fun BasicInformationPage(
                 }
 
                 item {
-                    var isFocused by remember { mutableStateOf(false) }
-                    OutlinedTextField(
-                        value = lastName,
-                        onValueChange = { lastName = it },
-                        label = { Text("Last Name") },
-                        supportingText = { Text("Enter your last name") },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.lastname),
-                                contentDescription = "lastname",
-                                modifier = Modifier.size(20.dp)
-                            )
+                    LastNameComponent(
+                        lastName = lastName,
+                        onLastNameChange = {
+                            lastName = it
                         },
-                        trailingIcon = {
-                            if (isFocused && lastName.isNotEmpty()) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.close),
-                                    contentDescription = "close",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                        onLastNameClear = {
+                            lastName = ""
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        singleLine = true
+                        errorMessage = lastNameError
                     )
                 }
 
@@ -170,36 +161,15 @@ fun BasicInformationPage(
                 }
 
                 item {
-                    var isFocused by remember { mutableStateOf(false) }
-                    OutlinedTextField(
-                        value = userName,
-                        onValueChange = { userName = it },
-                        label = { Text("User Name") },
-                        supportingText = { Text("Enter your user name. This will be use for others to see") },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.username),
-                                contentDescription = "userName",
-                                modifier = Modifier.size(20.dp)
-                            )
+                    UserNameComponent(
+                        userName = userName,
+                        onUserNameChange = {
+                            userName = it
                         },
-                        trailingIcon = {
-                            if (isFocused && userName.isNotEmpty()) {
-                                IconButton(onClick = { userName = "" }) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.close),
-                                        contentDescription = "close",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
+                        onUserNameClear = {
+                            userName = ""
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        singleLine = true
+                        errorMessage = userNameError
                     )
                 }
 
@@ -216,7 +186,14 @@ fun BasicInformationPage(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            nextPage()
+                            registrationScreenViewModel.setBasicInformation(
+                                info = BasicInformationRegistrationDTO(
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    userName = userName
+                                )
+                            )
+//                            nextPage()
                         }
                     ) {
                         Text("Begin Creating My Account")

@@ -8,6 +8,15 @@ plugins {
 }
 
 kotlin {
+
+    targets.all {
+        compilations.all {
+            compilerOptions.configure {
+                freeCompilerArgs.add("-Xexplicit-backing-fields")
+            }
+        }
+    }
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
