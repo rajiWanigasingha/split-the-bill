@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.system.screen.registration.BasicInformationPage
 import com.system.screen.registration.OneTimePasswordPage
 import com.system.screen.registration.ContactInformationPage
+import com.system.screen.registration.screen.RegistrationScreen
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
 
@@ -27,30 +28,6 @@ fun App() {
     ) {
 //        HomePage()
 
-        var page by remember { mutableStateOf("") }
-
-        when (page) {
-            "" -> {
-                BasicInformationPage {
-                    page = "phone"
-                }
-            }
-
-            "phone" -> {
-                ContactInformationPage(
-                    onBack = {
-                        page = ""
-                    }
-                ) {
-                    page = "otp"
-                }
-            }
-
-            "otp" -> {
-                OneTimePasswordPage {
-                    page = "phone"
-                }
-            }
-        }
+        RegistrationScreen()
     }
 }

@@ -8,8 +8,14 @@ import kotlinx.coroutines.flow.update
 
 class RegistrationScreenViewModel : ViewModel() {
 
+    val registrationPageState: StateFlow<RegistrationPages>
+        field = MutableStateFlow<RegistrationPages>(RegistrationPages.SetUpPage)
     val basicInformationPageState: StateFlow<BasicInformationPage>
         field = MutableStateFlow<BasicInformationPage>(BasicInformationPage.Init)
+
+    fun changeRegistrationPage(registrationPages: RegistrationPages) {
+        registrationPageState.update { registrationPages }
+    }
 
     fun setBasicInformation(info: BasicInformationRegistrationDTO) {
 
@@ -28,4 +34,11 @@ class RegistrationScreenViewModel : ViewModel() {
         basicInformationPageState.update { BasicInformationPage.CollectedBasicInformation(data = info) }
     }
 
+    fun saveState() {
+        if (basicInformationPageState.value is BasicInformationPage.CollectedBasicInformation) {
+            val info =
+                (basicInformationPageState.value as BasicInformationPage.CollectedBasicInformation).data
+            basicInformationPageState.update { BasicInformationPage.SaveState(info) }
+        }
+    }
 }

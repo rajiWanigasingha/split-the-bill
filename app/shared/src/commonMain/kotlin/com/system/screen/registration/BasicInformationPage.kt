@@ -74,6 +74,8 @@ fun BasicInformationPage(
             firstNameError = null
             lastNameError = null
             userNameError = null
+            nextPage()
+            registrationScreenViewModel.saveState()
         }
         is BasicInformationPage.CollectedValidationError -> {
             val error = (basicInformationState as BasicInformationPage.CollectedValidationError).data
@@ -82,6 +84,15 @@ fun BasicInformationPage(
             userNameError = error.userName
         }
         is BasicInformationPage.Init -> {
+            firstNameError = null
+            lastNameError = null
+            userNameError = null
+        }
+        is BasicInformationPage.SaveState -> {
+            val info = (basicInformationState as BasicInformationPage.SaveState).data
+            firstName = info.firstName
+            lastName = info.lastName
+            userName = info.userName
             firstNameError = null
             lastNameError = null
             userNameError = null
