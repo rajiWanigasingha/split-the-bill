@@ -27,9 +27,7 @@ fun RegistrationScreen(
             ) { registrationScreenViewModel.changeRegistrationPage(RegistrationPages.OTPPage) }
         }
         RegistrationPages.OTPPage -> {
-            OneTimePasswordPage {
-                registrationScreenViewModel.changeRegistrationPage(RegistrationPages.ContactInformationPage)
-            }
+            OneTimePasswordPage()
         }
     }
 

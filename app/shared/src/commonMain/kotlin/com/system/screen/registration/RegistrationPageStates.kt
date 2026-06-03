@@ -19,3 +19,10 @@ sealed class RegistrationPages {
     object ContactInformationPage : RegistrationPages()
     object OTPPage : RegistrationPages()
 }
+
+sealed class ValidateOTPPage {
+    object Init: ValidateOTPPage()
+    object Success: ValidateOTPPage()
+    data class Error(val error: String): ValidateOTPPage()
+    object Loading: ValidateOTPPage()
+}

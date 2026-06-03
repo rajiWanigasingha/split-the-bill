@@ -20,7 +20,14 @@ data class RegistrationTableDTO(
     val phoneNumber: String,
     val emailAddress: String,
     val otp: String? = null,
-    val expired: Boolean = false,
+    var expired: Boolean = false,
     val otpCreateAt: LocalDateTime? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
+
+@Serializable
+data class OTPValidationDTO(
+    val email: String,
+    val otp: String
+){
+}

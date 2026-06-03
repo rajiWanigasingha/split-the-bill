@@ -1,27 +1,31 @@
 package com.system.screen.registration
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class RegistrationScreenViewModel : ViewModel() {
 
     val registrationPageState: StateFlow<RegistrationPages>
-        field = MutableStateFlow<RegistrationPages>(RegistrationPages.SetUpPage)
+        field = MutableStateFlow<RegistrationPages>(RegistrationPages.OTPPage)
     val basicInformationPageState: StateFlow<BasicInformationPage>
         field = MutableStateFlow<BasicInformationPage>(BasicInformationPage.Init)
     val contactInformationPageState: StateFlow<ContactInformationPage>
         field = MutableStateFlow<ContactInformationPage>(ContactInformationPage.Init)
 
+    val validateOTPPageState: StateFlow<ValidateOTPPage>
+        field = MutableStateFlow<ValidateOTPPage>(ValidateOTPPage.Init)
 
     fun changeRegistrationPage(registrationPages: RegistrationPages) {
         registrationPageState.update { registrationPages }
@@ -73,7 +77,11 @@ class RegistrationScreenViewModel : ViewModel() {
                 },
                 phoneNumber = if (phoneNumberWithoutZero.isEmpty()) "Phone number cannot be empty" else null,
             )
-            contactInformationPageState.update { ContactInformationPage.CollectedValidationError(data = error) }
+            contactInformationPageState.update {
+                ContactInformationPage.CollectedValidationError(
+                    data = error
+                )
+            }
             return
         }
 
@@ -83,41 +91,56 @@ class RegistrationScreenViewModel : ViewModel() {
 
     fun saveContactInformation() {
         if (contactInformationPageState.value is ContactInformationPage.CollectedContactInformation) {
-            val info = (contactInformationPageState.value as ContactInformationPage.CollectedContactInformation).data
+            val info =
+                (contactInformationPageState.value as ContactInformationPage.CollectedContactInformation).data
             contactInformationPageState.update { ContactInformationPage.SaveState(data = info) }
         }
     }
 
-    suspend fun createNewUser() {
+    fun createNewUser() {
+        viewModelScope.launch {
 
-        val basicInformation = (basicInformationPageState.value as? BasicInformationPage.SaveState)?.data
-        val contactInformation = (contactInformationPageState.value as? ContactInformationPage.CollectedContactInformation)?.data
+            val basicInformation =
+                (basicInformationPageState.value as? BasicInformationPage.SaveState)?.data
+            val contactInformation =
+                (contactInformationPageState.value as? ContactInformationPage.CollectedContactInformation)?.data
 
-        if (basicInformation == null || contactInformation == null) {
-            return
-        }
-
-        val response = HttpClient() {
-            install(ContentNegotiation) {
-                json()
+            if (basicInformation == null || contactInformation == null) {
+                return@launch
             }
-        }
-            .post("http://localhost:8080/registration") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    RegistrationNewUserDTO(
-                        firstName = basicInformation.firstName,
-                        lastName = basicInformation.lastName,
-                        userName = basicInformation.userName,
-                        phoneNumber = contactInformation.phoneNumber,
-                        emailAddress = contactInformation.email
+
+            val response = HttpClient() {
+                install(ContentNegotiation) {
+                    json()
+                }
+            }
+                .post("http://localhost:8080/registration") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        RegistrationNewUserDTO(
+                            firstName = basicInformation.firstName,
+                            lastName = basicInformation.lastName,
+                            userName = basicInformation.userName,
+                            phoneNumber = contactInformation.phoneNumber,
+                            emailAddress = contactInformation.email
+                        )
                     )
-                )
-            }
+                }
 
-        if (response.status.value == 200) {
-            saveContactInformation()
-            registrationPageState.update { RegistrationPages.OTPPage }
+            if (response.status.value == 200) {
+                saveContactInformation()
+                registrationPageState.update { RegistrationPages.OTPPage }
+            }
+        }
+    }
+
+    fun validateOTP(otp: String) {
+        viewModelScope.launch {
+            validateOTPPageState.update { ValidateOTPPage.Loading }
+
+            delay(10000)
+
+            validateOTPPageState.update { ValidateOTPPage.Success }
         }
     }
 }

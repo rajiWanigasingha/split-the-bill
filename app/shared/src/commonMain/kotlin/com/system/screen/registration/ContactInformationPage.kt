@@ -83,10 +83,7 @@ fun ContactInformationPage(
             phoneNumberError = null
         }
         is ContactInformationPage.CollectedContactInformation -> {
-            LaunchedEffect(Unit) {
-                println("Create new user")
-                registrationScreenViewModel.createNewUser()
-            }
+            registrationScreenViewModel.createNewUser()
         }
         is ContactInformationPage.CollectedValidationError -> {
             val errors = (contactInformationPageState as ContactInformationPage.CollectedValidationError).data

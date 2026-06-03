@@ -62,4 +62,16 @@ fun Route.registrationRoute() {
             call.respond(Unit)
         }
     }
+
+    post("/registration/otp") {
+        val otpValidationObject =  runCatching {
+            call.receive<OTPValidationDTO>()
+        }.getOrElse {
+            logger.error(it.message, it)
+            call.respondText("Fail")
+            return@post
+        }
+
+
+    }
 }

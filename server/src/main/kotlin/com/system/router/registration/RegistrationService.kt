@@ -8,6 +8,6 @@ interface RegistrationService {
 
     fun sendOTP(userName: String, email: String, otp: String) : Boolean
 
-    fun validateOTP()
+    fun validateOTP(email: String, otp: String)
 
 }

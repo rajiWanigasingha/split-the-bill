@@ -90,7 +90,7 @@ class RegistrationServiceImpl(
         }
     }
 
-    override fun validateOTP() {
-        TODO("Not yet implemented")
+    override fun validateOTP(email: String, otp: String) {
+        val validate = responseRepository.validateOTP(email ,otp)
     }
 }

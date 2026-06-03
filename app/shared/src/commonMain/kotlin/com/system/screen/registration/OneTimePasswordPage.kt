@@ -1,5 +1,10 @@
 package com.system.screen.registration
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,14 +24,19 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,17 +56,21 @@ import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.back
 import split_the_bill.app.shared.generated.resources.register
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.system.screen.registration.components.OTPLoadingComponent
+import com.system.screen.registration.components.OtpValidateComponent
+import kotlinx.coroutines.launch
 import split_the_bill.app.shared.generated.resources.close
 import split_the_bill.app.shared.generated.resources.key
 
 
 @Composable
 fun OneTimePasswordPage(
-    onBack: () -> Unit
+    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() }
 ) {
 
     val focusManager = LocalFocusManager.current
-    var otpValue by remember { mutableStateOf("") }
+    val otpValidationState by registrationScreenViewModel.validateOTPPageState.collectAsState()
 
     Scaffold {
         Box(
@@ -71,120 +85,38 @@ fun OneTimePasswordPage(
                 },
             contentAlignment = Alignment.Center
         ) {
-            LazyColumn {
-                item {
-                    var isFocused by remember { mutableStateOf(false) }
+            val snackBarHostState = remember { SnackbarHostState() }
+            val scope = rememberCoroutineScope()
 
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "ONE TIME PASSWORD",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontFamily = jetBrainsMonoFontFamily(),
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "Enter the OTP that you will receive to the email address.",
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        OutlinedTextField(
-                            value = otpValue,
-                            onValueChange = {
-                                if (it.length <= 6 && it.all { char -> char.isDigit() }) {
-                                    otpValue = it
-                                }
-                            },
-                            label = { Text("One Time Password") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onFocusChanged {
-                                    isFocused = it.isFocused
-                                },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                textAlign = TextAlign.Center,
-                                letterSpacing = 8.sp,
-                                fontSize = 20.sp
-                            ),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.key),
-                                    contentDescription = "key",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                if (isFocused && otpValue.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = {
-                                            otpValue = ""
-                                        }
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.close),
-                                            contentDescription = "close",
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
+            AnimatedContent(
+                targetState = otpValidationState,
+                transitionSpec = {
+                    fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                }
+            ) { state ->
+                when (state) {
+                    ValidateOTPPage.Init, is ValidateOTPPage.Error -> {
+                        OtpValidateComponent(
+                            onCompleteOTPValue = {
+                                registrationScreenViewModel.validateOTP(it)
                             }
                         )
-                    }
-                }
+                        SnackbarHost(
+                            hostState = snackBarHostState
+                        )
 
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                onBack()
-                            },
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.back),
-                                contentDescription = "Back",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.size(8.dp))
-                            Text("Back")
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Button(
-                            onClick = {
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                        ) {
-                            Text("Setup My Account")
-                            Spacer(Modifier.size(8.dp))
-                            Icon(
-                                painter = painterResource(Res.drawable.register),
-                                contentDescription = "Back",
-                                modifier = Modifier.size(20.dp)
-                            )
+                        if (state is ValidateOTPPage.Error) {
+                            scope.launch {
+                                snackBarHostState.showSnackbar(state.error)
+                            }
                         }
                     }
+
+                    ValidateOTPPage.Loading -> {
+                        OTPLoadingComponent()
+                    }
+
+                    ValidateOTPPage.Success -> {}
                 }
             }
         }

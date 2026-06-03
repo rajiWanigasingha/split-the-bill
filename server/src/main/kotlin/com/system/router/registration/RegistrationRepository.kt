@@ -4,6 +4,6 @@ interface RegistrationRepository {
 
     fun createUser(registrationTableDTO: RegistrationTableDTO) : RegistrationResult<Unit>
 
-    fun validateOTP()
+    fun validateOTP(email: String, otp: String) : Boolean
 
 }

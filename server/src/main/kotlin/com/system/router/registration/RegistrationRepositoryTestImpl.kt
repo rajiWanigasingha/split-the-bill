@@ -36,7 +36,16 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         return RegistrationResult.Success(Unit)
     }
 
-    override fun validateOTP() {
-        TODO("Not yet implemented")
+    override fun validateOTP(email: String, otp: String): Boolean {
+        val registration = tempDB.indexOfFirst { it.emailAddress == email }
+
+        if (registration != -1) {
+            if (tempDB[registration].otp == otp) {
+                tempDB[registration].expired = true
+                return true
+            }
+        }
+
+        return false
     }
 }
