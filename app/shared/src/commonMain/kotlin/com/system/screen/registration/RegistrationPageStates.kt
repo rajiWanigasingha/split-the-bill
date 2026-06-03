@@ -7,6 +7,13 @@ sealed class BasicInformationPage {
     data class SaveState(val data: BasicInformationRegistrationDTO): BasicInformationPage()
 }
 
+sealed class ContactInformationPage {
+    object Init: ContactInformationPage()
+    data class CollectedContactInformation(val data: ContactInformationRegistrationDTO): ContactInformationPage()
+    data class CollectedValidationError(val data: ContactInformationRegistrationValidationErrorDTO): ContactInformationPage()
+    data class SaveState(val data: ContactInformationRegistrationDTO): ContactInformationPage()
+}
+
 sealed class RegistrationPages {
     object SetUpPage : RegistrationPages()
     object ContactInformationPage : RegistrationPages()

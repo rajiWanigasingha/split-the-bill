@@ -29,7 +29,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,9 +41,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.system.screen.registration.components.EmailAddressComponent
+import com.system.screen.registration.components.PhoneNumberComponent
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
@@ -53,19 +59,44 @@ import split_the_bill.app.shared.generated.resources.email
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ContactInformationPage(
+    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
     onBack: () -> Unit,
     onNextPage: () -> Unit
 ) {
-    var phoneNumber by remember { mutableStateOf("") }
+
+    val contactInformationPageState by registrationScreenViewModel.contactInformationPageState.collectAsState()
+
     var email by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    val countryCodes = listOf(
-        "LK (+94)", "US (+1)", "GB (+44)", "IN (+91)", "CA (+1)", "AU (+61)",
-        "DE (+49)", "FR (+33)", "JP (+81)", "CN (+86)", "BR (+55)"
-    )
-    var selectedCountryCode by remember { mutableStateOf(countryCodes[0]) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
+    var phoneNumber by remember { mutableStateOf("") }
+    var phoneNumberError by remember { mutableStateOf<String?>(null) }
+
+    var selectedCountryCode by remember { mutableStateOf("LK (+94)") }
+    var selectedCountryCodeError by remember { mutableStateOf<String?>(null) }
 
     val focusManager = LocalFocusManager.current
+
+    when (contactInformationPageState) {
+        is ContactInformationPage.Init -> {
+            emailError = null
+            phoneNumberError = null
+        }
+        is ContactInformationPage.CollectedContactInformation -> {
+            LaunchedEffect(Unit) {
+                println("Create new user")
+                registrationScreenViewModel.createNewUser()
+            }
+        }
+        is ContactInformationPage.CollectedValidationError -> {
+            val errors = (contactInformationPageState as ContactInformationPage.CollectedValidationError).data
+            emailError = errors.email
+            phoneNumberError = errors.phoneNumber
+        }
+        is ContactInformationPage.SaveState -> {
+            registrationScreenViewModel.saveContactInformation()
+        }
+    }
 
     Scaffold {
         Box(
@@ -106,36 +137,15 @@ fun ContactInformationPage(
                 }
 
                 item {
-                    var isFocused by remember { mutableStateOf(false) }
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email Address") },
-                        supportingText = { Text("Enter your email address") },
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(Res.drawable.email),
-                                contentDescription = "email",
-                                modifier = Modifier.size(20.dp)
-                            )
+                    EmailAddressComponent(
+                        email = email,
+                        onEmailChange = {
+                            email = it
                         },
-                        trailingIcon = {
-                            if (isFocused && email.isNotEmpty()) {
-                                IconButton(onClick = { email = "" }) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.close),
-                                        contentDescription = "close",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
+                        onEmailClear = {
+                            email = ""
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        singleLine = true
+                        errorMessage = emailError
                     )
                 }
 
@@ -144,49 +154,15 @@ fun ContactInformationPage(
                 }
 
                 item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded },
-                            modifier = Modifier.weight(0.4f)
-                        ) {
-                            OutlinedTextField(
-                                value = selectedCountryCode,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Code") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                                containerColor = MaterialTheme.colorScheme.background
-                            ) {
-                                countryCodes.forEach { code ->
-                                    DropdownMenuItem(
-                                        text = { Text(code) },
-                                        onClick = {
-                                            selectedCountryCode = code
-                                            expanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        OutlinedTextField(
-                            value = phoneNumber,
-                            onValueChange = { phoneNumber = it },
-                            label = { Text("Phone Number") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                            modifier = Modifier.weight(0.6f),
-                            maxLines = 1
-                        )
-                    }
+                    PhoneNumberComponent(
+                        selectedCountryCode = selectedCountryCode,
+                        onSelectedCountryCodeChange = { selectedCountryCode = it },
+                        onSelectedCountryCodeError = selectedCountryCodeError,
+                        phoneNumber = phoneNumber,
+                        onPhoneNumberChange = { phoneNumber = it },
+                        onPhoneNumberClear = { phoneNumber = "" },
+                        onPhoneNumberError = phoneNumberError
+                    )
                 }
 
                 item {
@@ -218,7 +194,13 @@ fun ContactInformationPage(
                         Spacer(modifier = Modifier.padding(4.dp))
                         Button(
                             onClick = {
-                                onNextPage()
+                                registrationScreenViewModel.setContactInformation(
+                                    info = ContactInformationRegistrationDTO(
+                                        email = email,
+                                        phoneNumber = phoneNumber,
+                                        countryCode = selectedCountryCode
+                                    )
+                                )
                             },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(4.dp),

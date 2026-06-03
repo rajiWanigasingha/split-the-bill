@@ -9,13 +9,13 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
+        freeCompilerArgs.add("-Xskip-prerelease-check")
     }
 }
 dependencies {
     implementation(projects.app.shared)
-
     implementation(libs.androidx.activity.compose)
-
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
 }

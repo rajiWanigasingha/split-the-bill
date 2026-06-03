@@ -15,43 +15,46 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.close
-import split_the_bill.app.shared.generated.resources.firstname
+import split_the_bill.app.shared.generated.resources.email
 
 @Composable
-fun FirstNameComponent(
-    firstName: String,
-    onFirstNameChange: (String) -> Unit,
-    onFirstNameClear: () -> Unit,
+fun EmailAddressComponent(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    onEmailClear: () -> Unit,
     errorMessage: String? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     OutlinedTextField(
+        value = email,
+        onValueChange = { onEmailChange(it) },
         isError = errorMessage != null,
-        value = firstName,
-        onValueChange = { onFirstNameChange(it) },
-        label = { Text("First Name") },
+        label = { Text("Email Address") },
         supportingText = {
-            if (errorMessage != null) {
-                Text(errorMessage)
+            if (errorMessage == null) {
+                Text("Enter your email address")
             } else {
-                Text("Enter your first name")
+                Text(errorMessage)
             }
         },
         leadingIcon = {
             Icon(
-                painter = painterResource(Res.drawable.firstname),
-                contentDescription = "fistName",
+                painter = painterResource(Res.drawable.email),
+                contentDescription = "email",
                 modifier = Modifier.size(20.dp)
             )
         },
         trailingIcon = {
-            if (isFocused && firstName.isNotEmpty()) {
-                IconButton(onClick = { onFirstNameClear() }) {
+            if (isFocused && email.isNotEmpty()) {
+                IconButton(
+                    onClick = { onEmailClear() }
+                ) {
                     Icon(
                         painter = painterResource(Res.drawable.close),
                         contentDescription = "close",
@@ -60,14 +63,15 @@ fun FirstNameComponent(
                 }
             }
         },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .onFocusChanged {
                 isFocused = it.isFocused
             },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Next
-        )
+        singleLine = true
     )
 }
