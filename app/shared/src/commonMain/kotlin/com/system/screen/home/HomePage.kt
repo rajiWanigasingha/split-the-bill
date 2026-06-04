@@ -1,7 +1,8 @@
-package com.system.screen
+package com.system.screen.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,9 @@ val recentSplitsExamples = listOf(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomePage() {
+fun HomePage(
+    logout: () -> Unit
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val collapsedFraction = scrollBehavior.state.collapsedFraction
 
@@ -161,7 +164,10 @@ fun HomePage() {
                             .padding(4.dp)
                             .size(40.dp)
                             .clip(CircleShape)
-                            .wrapContentHeight(),
+                            .wrapContentHeight()
+                            .clickable {
+                                logout()
+                            },
                         contentScale = ContentScale.Crop
                     )
                 }

@@ -1,34 +1,98 @@
 package com.system.screen.registration.screen
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.system.screen.registration.BasicInformationPage
-import com.system.screen.registration.ContactInformationPage
-import com.system.screen.registration.OneTimePasswordPage
-import com.system.screen.registration.RegistrationPages
-import com.system.screen.registration.RegistrationScreenViewModel
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
+import com.system.navigation.Pages
+import com.system.navigation.screenTypes.RegularScreen
+import com.system.screen.registration.pages.BasicInformationPage
+import com.system.screen.registration.pages.ContactInformationPage
+import com.system.screen.registration.pages.OneTimePasswordPage
+import kotlinx.serialization.Serializable
 
-@Composable
-fun RegistrationScreen(
-    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
-) {
+class RegistrationScreen : RegularScreen() {
 
-    val registrationPagesState by registrationScreenViewModel.registrationPageState.collectAsState()
+    sealed class ScreenPages {
+        @Serializable
+        data object BasicInformationPage : Pages()
 
-    when(registrationPagesState) {
-        RegistrationPages.SetUpPage -> {
-            BasicInformationPage { registrationScreenViewModel.changeRegistrationPage(RegistrationPages.ContactInformationPage) }
-        }
-        RegistrationPages.ContactInformationPage -> {
-            ContactInformationPage(
-                onBack = { registrationScreenViewModel.changeRegistrationPage(RegistrationPages.SetUpPage) }
-            ) { registrationScreenViewModel.changeRegistrationPage(RegistrationPages.OTPPage) }
-        }
-        RegistrationPages.OTPPage -> {
-            OneTimePasswordPage()
-        }
+        @Serializable
+        object ContactInformationPage : Pages()
+
+        @Serializable
+        object OneTimePasswordPage : Pages()
     }
 
+    @Composable
+    override fun NavigationBuilder() {
+        val backStack: MutableList<Pages> = rememberSerializable(
+            serializer = SnapshotStateListSerializer()
+        ) {
+            mutableStateListOf(ScreenPages.BasicInformationPage)
+        }
+        NavDisplay(
+            transitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            popTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = tween(300)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            predictivePopTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth },
+                    animationSpec = tween(300)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                )
+            },
+            backStack = backStack,
+            onBack = {
+                backStack.removeLastOrNull()
+            },
+            entryProvider = entryProvider {
+                entry<ScreenPages.BasicInformationPage> {
+                    BasicInformationPage(
+                        nextPage = {
+                            backStack.add(ScreenPages.ContactInformationPage)
+                        }
+                    )
+                }
+                entry<ScreenPages.ContactInformationPage> {
+                    ContactInformationPage(
+                        onBack = {
+                            backStack.removeLastOrNull()
+                        },
+                        onNextPage = {
+                            backStack.add(ScreenPages.OneTimePasswordPage)
+                        }
+                    )
+                }
+                entry<ScreenPages.OneTimePasswordPage> {
+                    OneTimePasswordPage()
+                }
+            }
+        )
+    }
 }
+

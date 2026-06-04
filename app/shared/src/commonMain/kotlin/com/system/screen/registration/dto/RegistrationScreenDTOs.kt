@@ -1,4 +1,4 @@
-package com.system.screen.registration
+package com.system.screen.registration.dto
 
 import kotlinx.serialization.Serializable
 

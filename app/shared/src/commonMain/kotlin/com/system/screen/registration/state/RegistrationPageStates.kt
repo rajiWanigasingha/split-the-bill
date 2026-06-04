@@ -1,4 +1,9 @@
-package com.system.screen.registration
+package com.system.screen.registration.state
+
+import com.system.screen.registration.dto.BasicInformationRegistrationDTO
+import com.system.screen.registration.dto.BasicInformationRegistrationValidationErrorDTO
+import com.system.screen.registration.dto.ContactInformationRegistrationDTO
+import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
 
 sealed class BasicInformationPage {
     object Init: BasicInformationPage()

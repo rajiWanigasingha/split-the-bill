@@ -66,6 +66,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
+            implementation(libs.jetbrains.material3.adaptiveNavigation3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -1,4 +1,4 @@
-package com.system.screen.registration
+package com.system.screen.registration.pages
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -30,6 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.system.screen.registration.state.BasicInformationPage
+import com.system.screen.registration.dto.BasicInformationRegistrationDTO
+import com.system.screen.registration.state.RegistrationScreenViewModel
 import com.system.screen.registration.components.FirstNameComponent
 import com.system.screen.registration.components.LastNameComponent
 import com.system.screen.registration.components.UserNameComponent

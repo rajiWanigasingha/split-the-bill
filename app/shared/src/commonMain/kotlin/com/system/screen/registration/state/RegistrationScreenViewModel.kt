@@ -1,7 +1,12 @@
-package com.system.screen.registration
+package com.system.screen.registration.state
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.system.screen.registration.dto.BasicInformationRegistrationDTO
+import com.system.screen.registration.dto.BasicInformationRegistrationValidationErrorDTO
+import com.system.screen.registration.dto.ContactInformationRegistrationDTO
+import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
+import com.system.screen.registration.dto.RegistrationNewUserDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
