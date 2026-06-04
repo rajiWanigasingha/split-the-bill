@@ -143,7 +143,9 @@ fun App() {
                         }
                     }
                     entry<Screens.Registration> {
-                        RegistrationScreen().NavigationBuilder()
+                        RegistrationScreen().NavigationBuilder {
+                            backStack.add(Screens.Home)
+                        }
                     }
                 }
             )

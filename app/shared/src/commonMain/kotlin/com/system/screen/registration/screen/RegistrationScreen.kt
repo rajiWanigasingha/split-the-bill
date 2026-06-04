@@ -32,7 +32,9 @@ class RegistrationScreen : RegularScreen() {
     }
 
     @Composable
-    override fun NavigationBuilder() {
+    override fun NavigationBuilder(
+        nav: () -> Unit
+    ) {
         val backStack: MutableList<Pages> = rememberSerializable(
             serializer = SnapshotStateListSerializer()
         ) {
@@ -89,7 +91,9 @@ class RegistrationScreen : RegularScreen() {
                     )
                 }
                 entry<ScreenPages.OneTimePasswordPage> {
-                    OneTimePasswordPage()
+                    OneTimePasswordPage {
+                        nav()
+                    }
                 }
             }
         )

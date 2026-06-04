@@ -5,5 +5,7 @@ import com.system.navigation.Screen
 
 abstract class RegularScreen : Screen {
     @Composable
-    abstract fun NavigationBuilder()
+    abstract fun NavigationBuilder(
+        nav: () -> Unit
+    )
 }

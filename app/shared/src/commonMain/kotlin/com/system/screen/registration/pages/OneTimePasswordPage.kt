@@ -33,7 +33,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OneTimePasswordPage(
-    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() }
+    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
+    onSuccess: ()-> Unit
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -83,7 +84,9 @@ fun OneTimePasswordPage(
                         OTPLoadingComponent()
                     }
 
-                    ValidateOTPPage.Success -> {}
+                    ValidateOTPPage.Success -> {
+                        onSuccess()
+                    }
                 }
             }
         }

@@ -74,6 +74,7 @@ fun ContactInformationPage(
         }
         is ContactInformationPage.CollectedContactInformation -> {
             registrationScreenViewModel.createNewUser()
+            onNextPage()
         }
         is ContactInformationPage.CollectedValidationError -> {
             val errors = (contactInformationPageState as ContactInformationPage.CollectedValidationError).data
