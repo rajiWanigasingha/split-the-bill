@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.system.screen.splits.components.Split
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -155,8 +156,6 @@ fun HomePage() {
                 }
             }
 
-
-
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -174,154 +173,15 @@ fun HomePage() {
             }
 
             Column {
-                recentSplitsExamples.forEachIndexed { index, split ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Image(
-                                            painter = painterResource(split.icon),
-                                            contentDescription = "Profile",
-                                            modifier = Modifier
-                                                .padding(end = 12.dp)
-                                                .size(50.dp)
-                                                .clip(CircleShape)
-                                                .wrapContentHeight(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                        Column {
-                                            Text(
-                                                text = "This Run By",
-                                                style = MaterialTheme.typography.labelSmall
-                                            )
-                                            Text(
-                                                text = split.runBy,
-                                                style = MaterialTheme.typography.bodyLargeEmphasized.copy(
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                                Column {
-                                    Text(
-                                        text = "Rs. ${split.mySplit.toInt()}.${
-                                            ((split.mySplit % 1) * 100).toInt().toString()
-                                                .padEnd(2, '0')
-                                        }",
-                                        style = MaterialTheme.typography.titleLargeEmphasized.copy(
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontFamily = jetBrainsMonoFontFamily()
-                                        )
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.size(8.dp))
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                SuggestionChip(
-                                    onClick = {},
-                                    label = {
-                                        Text(
-                                            "Split Among ${split.splitAmong}",
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
-                                )
-                                SuggestionChip(
-                                    onClick = {},
-                                    label = {
-                                        Text(
-                                            split.dateTime,
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
-                                )
-                            }
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Row {
-                                if (split.tags.isNotEmpty()) {
-                                    Text(
-                                        text = "This Expense is created by ${split.runBy} at ${split.dateTime}, for ${
-                                            split.tags.joinToString(
-                                                ", "
-                                            )
-                                        } and this expense split among ${split.splitAmong} more others.",
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                HorizontalFloatingToolbar(
-                                    expanded = true,
-                                    floatingActionButton = {
-                                        FloatingActionButton(
-                                            onClick = {},
-                                            containerColor = MaterialTheme.colorScheme.tertiary,
-                                            contentColor = MaterialTheme.colorScheme.onTertiary
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.expand),
-                                                contentDescription = "Group",
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    },
-                                    content = {
-                                        IconButton(
-                                            onClick = {}
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.group),
-                                                contentDescription = "Group",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {}
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.bookmark),
-                                                contentDescription = "Group",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {}
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.reminder),
-                                                contentDescription = "Group",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
+                recentSplitsExamples.forEach {
+                    Split(
+                        icon = it.icon,
+                        runBy = it.runBy,
+                        mySplit = it.mySplit,
+                        splitAmong = it.splitAmong,
+                        dateTime = it.dateTime,
+                        tags = it.tags
+                    )
                 }
             }
         }

@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 sealed class Screens : NavKey {
     @Serializable data object Home : Screens()
 
-    @Serializable data object Splits : Screens()
+    @Serializable data object Splits : Screens() {
+        @Serializable data object Id: Screens()
+    }
 
     @Serializable data object Remind : Screens()
 

@@ -1,5 +1,9 @@
 package com.system
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +44,7 @@ import com.system.screen.groups.screen.GroupScreen
 import com.system.screen.home.HomePage
 import com.system.screen.home.HomeScreenTopAppBar
 import com.system.screen.registration.screen.RegistrationScreen
+import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
 import com.system.screen.splits.screen.SplitScreen
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
@@ -70,7 +75,6 @@ fun App() {
 
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
         val focusManager = LocalFocusManager.current
-        var focusClear by remember { mutableStateOf(0) }
 
         Scaffold(
             modifier = Modifier
@@ -78,7 +82,6 @@ fun App() {
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         focusManager.clearFocus()
-                        focusClear++;
                     })
                 },
             topBar = {
@@ -88,12 +91,16 @@ fun App() {
                     }
 
                     Screens.Groups -> {
-                        GroupScreenTopAppBar(focusManager ,focusClear)
+                        GroupScreenTopAppBar(scrollBehavior)
+                    }
+
+                    Screens.Splits -> {
+                        SplitScreenTopAppBar(scrollBehavior)
                     }
 
                     Screens.Registration -> TODO()
                     Screens.Remind -> TODO()
-                    Screens.Splits -> TODO()
+                    Screens.Splits.Id -> TODO()
                 }
             },
             bottomBar = {
@@ -116,8 +123,10 @@ fun App() {
                             }
                         )
                         NavigationBarItem(
-                            selected = false,
-                            onClick = {},
+                            selected = backStack.last() is Screens.Splits,
+                            onClick = {
+                                backStack.add(Screens.Splits)
+                            },
                             icon = {
                                 Icon(
                                     painter = painterResource(Res.drawable.all_splits),
@@ -186,6 +195,33 @@ fun App() {
                     .padding(contentPadding)
             ) {
                 NavDisplay(
+                    transitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> fullWidth },
+                            animationSpec = tween(600)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(600)
+                        )
+                    },
+                    popTransitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(600)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> fullWidth },
+                            animationSpec = tween(600)
+                        )
+                    },
+                    predictivePopTransitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(600)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> fullWidth },
+                            animationSpec = tween(600)
+                        )
+                    },
                     backStack = backStack,
                     onBack = {
                         backStack.removeLastOrNull()

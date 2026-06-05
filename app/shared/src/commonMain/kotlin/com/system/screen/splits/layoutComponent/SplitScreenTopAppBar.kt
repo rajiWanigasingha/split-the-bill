@@ -1,54 +1,27 @@
-package com.system.screen.groups.layoutComponent
+package com.system.screen.splits.layoutComponent
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.system.theme.jetBrainsMonoFontFamily
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.backArrow
-import split_the_bill.app.shared.generated.resources.backward
-import split_the_bill.app.shared.generated.resources.close
-import split_the_bill.app.shared.generated.resources.menu
 import split_the_bill.app.shared.generated.resources.search
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupScreenTopAppBar(
+fun SplitScreenTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     val collapsedFraction = scrollBehavior.state.collapsedFraction
@@ -73,7 +46,7 @@ fun GroupScreenTopAppBar(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "All Split Groups",
+                        text = "All Split Bills",
                         style = MaterialTheme.typography.titleLargeEmphasized,
                         fontFamily = jetBrainsMonoFontFamily(),
                         fontWeight = FontWeight.SemiBold
