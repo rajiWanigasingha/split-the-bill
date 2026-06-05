@@ -1,5 +1,10 @@
 package com.system
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -11,20 +16,34 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import com.system.navigation.screens.Screens
+import com.system.screen.groups.layoutComponent.GroupScreenTopAppBar
+import com.system.screen.groups.screen.GroupScreen
 import com.system.screen.home.HomePage
+import com.system.screen.home.HomeScreenTopAppBar
 import com.system.screen.registration.screen.RegistrationScreen
+import com.system.screen.splits.screen.SplitScreen
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
@@ -49,13 +68,42 @@ fun App() {
             mutableStateListOf(Screens.Home)
         }
 
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        val focusManager = LocalFocusManager.current
+        var focusClear by remember { mutableStateOf(0) }
+
         Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                        focusClear++;
+                    })
+                },
+            topBar = {
+                when (backStack.last()) {
+                    Screens.Home -> {
+                        HomeScreenTopAppBar(scrollBehavior)
+                    }
+
+                    Screens.Groups -> {
+                        GroupScreenTopAppBar(focusManager ,focusClear)
+                    }
+
+                    Screens.Registration -> TODO()
+                    Screens.Remind -> TODO()
+                    Screens.Splits -> TODO()
+                }
+            },
             bottomBar = {
                 if (backStack.last() !is Screens.Registration) {
                     BottomAppBar {
                         NavigationBarItem(
-                            selected = false,
-                            onClick = {},
+                            selected = backStack.last() is Screens.Home,
+                            onClick = {
+                                backStack.add(Screens.Home)
+                            },
                             icon = {
                                 Icon(
                                     painter = painterResource(Res.drawable.home),
@@ -113,8 +161,10 @@ fun App() {
                             }
                         )
                         NavigationBarItem(
-                            selected = false,
-                            onClick = {},
+                            selected = backStack.last() is Screens.Groups,
+                            onClick = {
+                                backStack.add(Screens.Groups)
+                            },
                             icon = {
                                 Icon(
                                     painter = painterResource(Res.drawable.group),
@@ -129,27 +179,35 @@ fun App() {
                     }
                 }
             }
-        ) {
-
-            NavDisplay(
-                backStack = backStack,
-                onBack = {
-                    backStack.removeLastOrNull()
-                },
-                entryProvider = entryProvider {
-                    entry<Screens.Home> {
-                        HomePage {
-                            backStack.add(Screens.Registration)
+        ) { contentPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+            ) {
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    entryProvider = entryProvider {
+                        entry<Screens.Home> {
+                            HomePage()
+                        }
+                        entry<Screens.Groups> {
+                            GroupScreen().NavigationBuilder { }
+                        }
+                        entry<Screens.Registration> {
+                            RegistrationScreen().NavigationBuilder {
+                                backStack.add(Screens.Home)
+                            }
+                        }
+                        entry<Screens.Splits> {
+                            SplitScreen().NavigationBuilder {  }
                         }
                     }
-                    entry<Screens.Registration> {
-                        RegistrationScreen().NavigationBuilder {
-                            backStack.add(Screens.Home)
-                        }
-                    }
-                }
-            )
-
+                )
+            }
         }
     }
 }
