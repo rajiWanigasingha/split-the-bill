@@ -101,7 +101,7 @@ fun App() {
                     }
 
                     Screens.SplitId -> {
-                        SplitIdScreenTopAppBar(scrollBehavior)
+                        SplitIdScreenTopAppBar()
                     }
 
                     else -> {}

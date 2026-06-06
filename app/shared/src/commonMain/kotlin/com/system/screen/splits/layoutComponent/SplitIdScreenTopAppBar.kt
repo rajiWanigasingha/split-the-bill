@@ -36,10 +36,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.system.screen.splits.states.SpiltItTabState
+import com.system.screen.splits.states.SplitIdTabsViewModel
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.backArrow
+import split_the_bill.app.shared.generated.resources.bookmark
 import split_the_bill.app.shared.generated.resources.profile
 import split_the_bill.app.shared.generated.resources.reminder
 import split_the_bill.app.shared.generated.resources.search
@@ -47,8 +51,11 @@ import split_the_bill.app.shared.generated.resources.search
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SplitIdScreenTopAppBar(
-    scrollBehavior: TopAppBarScrollBehavior
+    splitItTabsViewModel: SplitIdTabsViewModel = viewModel { SplitIdTabsViewModel() },
 ) {
+
+
+
     MediumTopAppBar(
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
         navigationIcon = {
@@ -67,13 +74,27 @@ fun SplitIdScreenTopAppBar(
                 listOf("Information", "Reminders", "Split Among").forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab.intValue == index,
-                        onClick = { selectedTab.intValue = index },
+                        onClick = {
+                            selectedTab.intValue = index
+                            when (title) {
+                                "Information" -> splitItTabsViewModel.switchTab(SpiltItTabState.Information)
+                                "Reminders" -> splitItTabsViewModel.switchTab(SpiltItTabState.Reminder)
+                                else -> splitItTabsViewModel.switchTab(SpiltItTabState.SpiltAmong)
+                            }
+                        },
                         text = { Text(title) },
                     )
                 }
             }
         },
         actions = {
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(Res.drawable.bookmark),
+                    contentDescription = "Group",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     )
 
