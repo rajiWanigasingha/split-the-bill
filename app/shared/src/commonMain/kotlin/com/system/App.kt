@@ -44,7 +44,9 @@ import com.system.screen.groups.screen.GroupScreen
 import com.system.screen.home.HomePage
 import com.system.screen.home.HomeScreenTopAppBar
 import com.system.screen.registration.screen.RegistrationScreen
+import com.system.screen.splits.layoutComponent.SplitIdScreenTopAppBar
 import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
+import com.system.screen.splits.screen.SplitIdScreen
 import com.system.screen.splits.screen.SplitScreen
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
@@ -98,9 +100,11 @@ fun App() {
                         SplitScreenTopAppBar(scrollBehavior)
                     }
 
-                    Screens.Registration -> TODO()
-                    Screens.Remind -> TODO()
-                    Screens.Splits.Id -> TODO()
+                    Screens.SplitId -> {
+                        SplitIdScreenTopAppBar(scrollBehavior)
+                    }
+
+                    else -> {}
                 }
             },
             bottomBar = {
@@ -239,7 +243,12 @@ fun App() {
                             }
                         }
                         entry<Screens.Splits> {
-                            SplitScreen().NavigationBuilder {  }
+                            SplitScreen().NavigationBuilder {
+                                backStack.add(Screens.SplitId)
+                            }
+                        }
+                        entry<Screens.SplitId> {
+                            SplitIdScreen().NavigationBuilder {  }
                         }
                     }
                 )

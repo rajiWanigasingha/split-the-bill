@@ -44,7 +44,8 @@ fun Split(
     mySplit: Float,
     splitAmong: Int,
     dateTime: String,
-    tags: List<String>
+    tags: List<String>,
+    actionExpand: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -146,7 +147,9 @@ fun Split(
                     expanded = true,
                     floatingActionButton = {
                         FloatingActionButton(
-                            onClick = {},
+                            onClick = {
+                                actionExpand()
+                            },
                             containerColor = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary
                         ) {

@@ -72,7 +72,9 @@ class SplitScreen : RegularScreen() {
                     splitAmong = it.splitAmong,
                     dateTime = it.dateTime,
                     tags = it.tags
-                )
+                ) {
+                    nav()
+                }
             }
         }
 
