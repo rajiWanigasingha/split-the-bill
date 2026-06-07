@@ -13,7 +13,11 @@ import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.profile
 import com.system.screen.splits.components.Split
 
-class SplitScreen : RegularScreen() {
+class SplitScreen(
+    private val actionExpand: () -> Unit = {},
+    private val reminderTab: () -> Unit = {},
+    private val splitAmongTab: () -> Unit = {}
+) : RegularScreen() {
     @Composable
     override fun NavigationBuilder(nav: () -> Unit) {
 
@@ -71,10 +75,11 @@ class SplitScreen : RegularScreen() {
                     mySplit = it.mySplit,
                     splitAmong = it.splitAmong,
                     dateTime = it.dateTime,
-                    tags = it.tags
-                ) {
-                    nav()
-                }
+                    tags = it.tags,
+                    actionExpand = actionExpand,
+                    reminderTab = reminderTab,
+                    splitAmongTab = splitAmongTab
+                )
             }
         }
 

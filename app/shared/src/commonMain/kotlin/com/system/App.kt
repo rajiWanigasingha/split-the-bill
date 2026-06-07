@@ -8,7 +8,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -22,13 +21,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSerializable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -48,16 +42,16 @@ import com.system.screen.splits.layoutComponent.SplitIdScreenTopAppBar
 import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
 import com.system.screen.splits.screen.SplitIdScreen
 import com.system.screen.splits.screen.SplitScreen
+import com.system.screen.splits.states.SpiltItTabState
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
 import split_the_bill.app.shared.generated.resources.all_splits
 import split_the_bill.app.shared.generated.resources.group
 import split_the_bill.app.shared.generated.resources.home
-import split_the_bill.app.shared.generated.resources.reminder
+import split_the_bill.app.shared.generated.resources.stats
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -100,7 +94,7 @@ fun App() {
                         SplitScreenTopAppBar(scrollBehavior)
                     }
 
-                    Screens.SplitId -> {
+                    is Screens.SplitId -> {
                         SplitIdScreenTopAppBar()
                     }
 
@@ -164,13 +158,13 @@ fun App() {
                             onClick = {},
                             icon = {
                                 Icon(
-                                    painter = painterResource(Res.drawable.reminder),
-                                    contentDescription = "reminder",
+                                    painter = painterResource(Res.drawable.stats),
+                                    contentDescription = "statics",
                                     modifier = Modifier.size(20.dp)
                                 )
                             },
                             label = {
-                                Text("Remind")
+                                Text("Statics")
                             }
                         )
                         NavigationBarItem(
@@ -243,12 +237,15 @@ fun App() {
                             }
                         }
                         entry<Screens.Splits> {
-                            SplitScreen().NavigationBuilder {
-                                backStack.add(Screens.SplitId)
-                            }
+                            SplitScreen(
+                                actionExpand = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Information)) },
+                                reminderTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Reminder)) },
+                                splitAmongTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.SpiltAmong)) }
+                            ).NavigationBuilder {}
                         }
                         entry<Screens.SplitId> {
-                            SplitIdScreen().NavigationBuilder {  }
+                            val splitTab = backStack.last() as? Screens.SplitId
+                            SplitIdScreen(splitTab?.tab ?: SpiltItTabState.Information).NavigationBuilder {  }
                         }
                     }
                 )

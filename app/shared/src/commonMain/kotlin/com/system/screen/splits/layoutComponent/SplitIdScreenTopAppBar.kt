@@ -24,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +56,17 @@ fun SplitIdScreenTopAppBar(
     splitItTabsViewModel: SplitIdTabsViewModel = viewModel { SplitIdTabsViewModel() },
 ) {
 
+    val splitItTabsState = splitItTabsViewModel.tabSwitchState.collectAsState()
+    val selectedTab = remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(splitItTabsState.value) {
+        when (splitItTabsState.value) {
+            SpiltItTabState.Information -> selectedTab.value = 0
+            SpiltItTabState.Reminder -> selectedTab.value = 1
+            SpiltItTabState.SpiltAmong -> selectedTab.value = 2
+        }
+    }
+
 
 
     MediumTopAppBar(
@@ -68,8 +81,6 @@ fun SplitIdScreenTopAppBar(
             }
         },
         title = {
-            val selectedTab = remember { mutableIntStateOf(0) }
-
             PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
                 listOf("Information", "Reminders", "Split Among").forEachIndexed { index, title ->
                     Tab(

@@ -45,7 +45,9 @@ fun Split(
     splitAmong: Int,
     dateTime: String,
     tags: List<String>,
-    actionExpand: () -> Unit = {}
+    actionExpand: () -> Unit = {},
+    reminderTab: () -> Unit = {},
+    splitAmongTab: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -162,7 +164,9 @@ fun Split(
                     },
                     content = {
                         IconButton(
-                            onClick = {}
+                            onClick = {
+                                splitAmongTab()
+                            }
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.group),
@@ -182,7 +186,9 @@ fun Split(
                             )
                         }
                         IconButton(
-                            onClick = {}
+                            onClick = {
+                                reminderTab()
+                            }
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.reminder),
