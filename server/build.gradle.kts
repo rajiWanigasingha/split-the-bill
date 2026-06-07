@@ -24,6 +24,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.0")
     implementation("com.resend:resend-java:v4.14.1")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("io.ktor:ktor-server-auth:3.5.0")
+    implementation("io.ktor:ktor-server-auth-jwt:3.5.0")
 
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)

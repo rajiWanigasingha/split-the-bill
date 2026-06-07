@@ -1,6 +1,8 @@
-package com.system.router.registration
+package com.system.router.registration.repos
 
-import org.koin.ktor.ext.inject
+import com.system.router.registration.errors.RegistrationErrors
+import com.system.router.registration.helpers.RegistrationResult
+import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
 import java.time.LocalDateTime
 
 class RegistrationRepositoryTestImpl : RegistrationRepository {
@@ -47,5 +49,9 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         }
 
         return false
+    }
+
+    override fun storeAccessToken(email: String, accessToken: String) {
+        TODO("Not yet implemented")
     }
 }

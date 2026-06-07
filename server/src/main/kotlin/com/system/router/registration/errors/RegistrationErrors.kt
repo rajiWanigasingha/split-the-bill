@@ -1,4 +1,4 @@
-package com.system.router.registration
+package com.system.router.registration.errors
 
 import kotlinx.serialization.Serializable
 

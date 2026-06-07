@@ -66,7 +66,7 @@ fun App() {
         val backStack: MutableList<Screens> = rememberSerializable(
             serializer = SnapshotStateListSerializer()
         ) {
-            mutableStateListOf(Screens.Home)
+            mutableStateListOf(Screens.Registration)
         }
 
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()

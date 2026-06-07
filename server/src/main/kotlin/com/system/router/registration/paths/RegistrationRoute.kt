@@ -1,5 +1,11 @@
-package com.system.router.registration
+package com.system.router.registration.paths
 
+import com.system.router.registration.errors.RegistrationError
+import com.system.router.registration.errors.RegistrationErrors
+import com.system.router.registration.helpers.RegistrationResult
+import com.system.router.registration.dtos.requestDTO.OTPValidationRequestDTO
+import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequestDTO
+import com.system.router.registration.service.RegistrationService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -17,7 +23,7 @@ fun Route.registrationRoute() {
     post("/registration") {
 
         val userRegisterObj = runCatching {
-            call.receive<RegistrationNewUserDTO>()
+            call.receive<RegistrationNewUserRequestDTO>()
         }.getOrElse {
             logger.error(it.message, it)
             call.respondText("Fail")
@@ -65,12 +71,14 @@ fun Route.registrationRoute() {
 
     post("/registration/otp") {
         val otpValidationObject =  runCatching {
-            call.receive<OTPValidationDTO>()
+            call.receive<OTPValidationRequestDTO>()
         }.getOrElse {
             logger.error(it.message, it)
             call.respondText("Fail")
             return@post
         }
+
+        val validateOTP = registrationService.validateOTP(otpValidationObject.email ,otpValidationObject.otp)
 
 
     }
