@@ -1,5 +1,6 @@
 package com.system.router.registration.service
 
+import com.system.router.registration.dtos.repoDTO.RegistrationJWTToken
 import com.system.router.registration.helpers.RegistrationResult
 import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequestDTO
 
@@ -11,6 +12,6 @@ interface RegistrationService {
 
     fun sendOTP(userName: String, email: String, otp: String) : Boolean
 
-    fun validateOTP(email: String, otp: String)
+    fun validateOTP(email: String, otp: String) : RegistrationJWTToken?
 
 }

@@ -10,6 +10,9 @@ data class RegistrationTableDTO(
     val emailAddress: String,
     val otp: String? = null,
     var expired: Boolean = false,
+    var refreshToken: String? = null,
+    var refreshTokenUpdateAt: LocalDateTime? = null,
+    var validRefreshTokenTime: LocalDateTime? = null,
     val otpCreateAt: LocalDateTime? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

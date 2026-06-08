@@ -2,6 +2,7 @@ package com.system.router.registration.repos
 
 import com.system.router.registration.helpers.RegistrationResult
 import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
+import java.time.LocalDateTime
 
 interface RegistrationRepository {
 
@@ -9,6 +10,6 @@ interface RegistrationRepository {
 
     fun validateOTP(email: String, otp: String) : Boolean
 
-    fun storeAccessToken(email: String, accessToken: String)
+    fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean
 
 }

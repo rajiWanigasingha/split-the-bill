@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.resend.Resend
 import com.resend.services.emails.model.CreateEmailOptions
 import com.system.loadEnv.AppConfig
+import com.system.router.registration.dtos.repoDTO.RegistrationJWTToken
 import com.system.router.registration.errors.RegistrationErrors
 import com.system.router.registration.repos.RegistrationRepository
 import com.system.router.registration.helpers.RegistrationResult
@@ -12,6 +13,8 @@ import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
 import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequestDTO
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Date
 
 class RegistrationServiceImpl(
@@ -93,7 +96,7 @@ class RegistrationServiceImpl(
 
     }
 
-    override fun validateOTP(email: String, otp: String) {
+    override fun validateOTP(email: String, otp: String) : RegistrationJWTToken? {
 
         val digest = MessageDigest.getInstance("SHA-256")
 
@@ -103,12 +106,17 @@ class RegistrationServiceImpl(
         val validate = responseRepository.validateOTP(email ,hashOTP)
 
         if (validate) {
+            val refreshTokenExpireAt = LocalDateTime.now().plusDays(30)
+            val refreshTokenExpireAtDate = Date.from(refreshTokenExpireAt.atZone(ZoneId.systemDefault()).toInstant()) // 30 days
+            val accessTokenExpireAt = LocalDateTime.now().plusHours(1)
+            val accessTokenExpireAtDate = Date.from(accessTokenExpireAt.atZone(ZoneId.systemDefault()).toInstant()) // 1 hour
+
             val refreshToken = JWT.create()
                 .withAudience(appConfig.jwt.audience)
                 .withIssuer(appConfig.jwt.issuer)
                 .withClaim("email" ,email)
                 .withClaim("type", "refresh")
-                .withExpiresAt(Date(System.currentTimeMillis() + 60 * 60 * 1000)) // 1 hour
+                .withExpiresAt(refreshTokenExpireAtDate)
                 .sign(Algorithm.HMAC256(appConfig.jwt.secret))
 
             val accessToken = JWT.create()
@@ -116,12 +124,30 @@ class RegistrationServiceImpl(
                 .withIssuer(appConfig.jwt.issuer)
                 .withClaim("email" ,email)
                 .withClaim("type", "access")
-                .withExpiresAt(Date(System.currentTimeMillis() +  30L * 24 * 60 * 60 * 1000)) // 30 days
+                .withExpiresAt(accessTokenExpireAtDate)
                 .sign(Algorithm.HMAC256(appConfig.jwt.secret))
 
             val hashRefreshToken = digest.digest(refreshToken.toByteArray())
                 .joinToString("") { "%02x".format(it) }
 
+            val refreshTokenStored = responseRepository.storeAccessToken(
+                email = email,
+                refreshToken = hashRefreshToken,
+                refreshTokenExpireDate = refreshTokenExpireAt
+            )
+
+            if (refreshTokenStored) {
+                return RegistrationJWTToken(
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                    accessTokenExpireDate = accessTokenExpireAt.toString(),
+                    refreshTokenExpireDate = refreshTokenExpireAt.toString()
+                )
+            } else {
+                return null
+            }
         }
+
+        return null
     }
 }

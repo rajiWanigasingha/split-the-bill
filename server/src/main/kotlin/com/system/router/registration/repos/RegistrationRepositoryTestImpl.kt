@@ -6,7 +6,6 @@ import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
 import java.time.LocalDateTime
 
 class RegistrationRepositoryTestImpl : RegistrationRepository {
-
     private val tempDB = mutableListOf<RegistrationTableDTO>()
 
     override fun createUser(registrationTableDTO: RegistrationTableDTO): RegistrationResult<Unit> {
@@ -51,7 +50,17 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         return false
     }
 
-    override fun storeAccessToken(email: String, accessToken: String) {
-        TODO("Not yet implemented")
+    override fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean {
+        val indexOf = tempDB.indexOfFirst { it.emailAddress == email }
+
+        if (indexOf == -1) {
+            return false
+        }
+
+        tempDB[indexOf].refreshToken = refreshToken
+        tempDB[indexOf].refreshTokenUpdateAt = LocalDateTime.now()
+        tempDB[indexOf].validRefreshTokenTime = refreshTokenExpireDate
+
+        return true
     }
 }

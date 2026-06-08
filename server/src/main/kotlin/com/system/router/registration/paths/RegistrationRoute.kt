@@ -73,13 +73,31 @@ fun Route.registrationRoute() {
         val otpValidationObject =  runCatching {
             call.receive<OTPValidationRequestDTO>()
         }.getOrElse {
-            logger.error(it.message, it)
-            call.respondText("Fail")
+            call.respond(
+                HttpStatusCode.BadRequest,
+                RegistrationError(
+                    errorCode = 4,
+                    errorMessage = "Invalid request"
+                )
+            )
             return@post
         }
 
         val validateOTP = registrationService.validateOTP(otpValidationObject.email ,otpValidationObject.otp)
 
-
+        if (validateOTP != null) {
+            call.respond(
+                HttpStatusCode.OK,
+                validateOTP
+            )
+        } else {
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                RegistrationError(
+                    errorCode = 5,
+                    errorMessage = "Fail to create JWT token"
+                )
+            )
+        }
     }
 }
