@@ -37,3 +37,17 @@ data class RegistrationNewUserDTO(
     val phoneNumber: String,
     val emailAddress: String
 )
+
+@Serializable
+data class RegistrationValidationOTP(
+    val email: String,
+    val otp: String
+)
+
+@Serializable
+data class RegistrationJWT(
+    val accessToken: String,
+    val refreshToken: String,
+    val accessTokenExpireDate: String,
+    val refreshTokenExpireDate: String
+)

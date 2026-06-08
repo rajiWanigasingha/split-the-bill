@@ -6,8 +6,11 @@ import com.system.screen.registration.dto.BasicInformationRegistrationDTO
 import com.system.screen.registration.dto.BasicInformationRegistrationValidationErrorDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
+import com.system.screen.registration.dto.RegistrationJWT
 import com.system.screen.registration.dto.RegistrationNewUserDTO
+import com.system.screen.registration.dto.RegistrationValidationOTP
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -143,7 +146,36 @@ class RegistrationScreenViewModel : ViewModel() {
         viewModelScope.launch {
             validateOTPPageState.update { ValidateOTPPage.Loading }
 
-            delay(10000)
+            val contactInformation =
+                (contactInformationPageState.value as? ContactInformationPage.SaveState)?.data
+
+            if (contactInformation == null) {
+                validateOTPPageState.update { ValidateOTPPage.Error("Couldn't get contact information") }
+                return@launch
+            }
+
+            val response = HttpClient() {
+                install(ContentNegotiation) {
+                    json()
+                }
+            }
+                .post("http://localhost:8080/registration/otp") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        RegistrationValidationOTP(
+                            email = contactInformation.email,
+                            otp = otp
+                        )
+                    )
+                }
+
+            if (response.status.value == 200) {
+                val jwtTokens = response.body<RegistrationJWT>()
+                println(jwtTokens.refreshToken)
+                println(jwtTokens.accessToken)
+                println(jwtTokens.refreshTokenExpireDate)
+                println(jwtTokens.accessTokenExpireDate)
+            }
 
             validateOTPPageState.update { ValidateOTPPage.Success }
         }
