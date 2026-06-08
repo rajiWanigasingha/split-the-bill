@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 class RegistrationRepositoryTestImpl : RegistrationRepository {
     private val tempDB = mutableListOf<RegistrationTableDTO>()
 
-    override fun createUser(registrationTableDTO: RegistrationTableDTO): RegistrationResult<Unit> {
+    override suspend fun createUser(registrationTableDTO: RegistrationTableDTO): RegistrationResult<Unit> {
 
         val findUser = tempDB.find { it.phoneNumber == registrationTableDTO.phoneNumber && it.emailAddress == registrationTableDTO.emailAddress }
 
@@ -37,7 +37,7 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         return RegistrationResult.Success(Unit)
     }
 
-    override fun validateOTP(email: String, otp: String): Boolean {
+    override suspend fun validateOTP(email: String, otp: String): Boolean {
         val registration = tempDB.indexOfFirst { it.emailAddress == email }
 
         if (registration != -1) {
@@ -50,7 +50,7 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         return false
     }
 
-    override fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean {
+    override suspend fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean {
         val indexOf = tempDB.indexOfFirst { it.emailAddress == email }
 
         if (indexOf == -1) {

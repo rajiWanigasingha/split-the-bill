@@ -6,10 +6,10 @@ import java.time.LocalDateTime
 
 interface RegistrationRepository {
 
-    fun createUser(registrationTableDTO: RegistrationTableDTO) : RegistrationResult<Unit>
+    suspend fun createUser(registrationTableDTO: RegistrationTableDTO) : RegistrationResult<Unit>
 
-    fun validateOTP(email: String, otp: String) : Boolean
+    suspend fun validateOTP(email: String, otp: String) : Boolean
 
-    fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean
+    suspend fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean
 
 }

@@ -22,7 +22,7 @@ class RegistrationServiceImpl(
     private val responseRepository: RegistrationRepository
 ) : RegistrationService {
 
-    override fun createNewUser(registrationNewUserDTO: RegistrationNewUserRequestDTO): RegistrationResult<Unit> {
+    override suspend fun createNewUser(registrationNewUserDTO: RegistrationNewUserRequestDTO): RegistrationResult<Unit> {
         val otp = generateOTP()
 
         val response = responseRepository.createUser(
@@ -54,7 +54,7 @@ class RegistrationServiceImpl(
         return response
     }
 
-    override fun generateOTP(): Pair<String, String> {
+    override suspend fun generateOTP(): Pair<String, String> {
         val random = SecureRandom()
         val digest = MessageDigest.getInstance("SHA-256")
 
@@ -68,7 +68,7 @@ class RegistrationServiceImpl(
         return Pair(hashOTP, otp)
     }
 
-    override fun sendOTP(userName: String, email: String, otp: String): Boolean {
+    override suspend fun sendOTP(userName: String, email: String, otp: String): Boolean {
         val resendKey = appConfig.resendApiKey
         var otpTemplate = appConfig.htmlTemplate
 
@@ -96,7 +96,7 @@ class RegistrationServiceImpl(
 
     }
 
-    override fun validateOTP(email: String, otp: String) : RegistrationJWTToken? {
+    override suspend fun validateOTP(email: String, otp: String) : RegistrationJWTToken? {
 
         val digest = MessageDigest.getInstance("SHA-256")
 

@@ -6,12 +6,12 @@ import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequest
 
 interface RegistrationService {
 
-    fun createNewUser(registrationNewUserDTO: RegistrationNewUserRequestDTO) : RegistrationResult<Unit>
+    suspend fun createNewUser(registrationNewUserDTO: RegistrationNewUserRequestDTO) : RegistrationResult<Unit>
 
-    fun generateOTP() : Pair<String , String>
+    suspend fun generateOTP() : Pair<String , String>
 
-    fun sendOTP(userName: String, email: String, otp: String) : Boolean
+    suspend fun sendOTP(userName: String, email: String, otp: String) : Boolean
 
-    fun validateOTP(email: String, otp: String) : RegistrationJWTToken?
+    suspend fun validateOTP(email: String, otp: String) : RegistrationJWTToken?
 
 }
