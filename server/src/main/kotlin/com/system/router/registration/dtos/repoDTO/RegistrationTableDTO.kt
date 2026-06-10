@@ -1,5 +1,6 @@
 package com.system.router.registration.dtos.repoDTO
 
+import java.time.Instant
 import java.time.LocalDateTime
 
 data class RegistrationTableDTO(
@@ -12,7 +13,7 @@ data class RegistrationTableDTO(
     var expired: Boolean = false,
     var refreshToken: String? = null,
     var refreshTokenUpdateAt: LocalDateTime? = null,
-    var validRefreshTokenTime: LocalDateTime? = null,
+    var validRefreshTokenTime: Instant? = null,
     val otpCreateAt: LocalDateTime? = null,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

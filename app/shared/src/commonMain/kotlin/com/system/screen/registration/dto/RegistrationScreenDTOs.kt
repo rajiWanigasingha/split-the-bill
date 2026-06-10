@@ -45,14 +45,6 @@ data class RegistrationValidationOTP(
 )
 
 @Serializable
-data class RegistrationJWT(
-    val accessToken: String,
-    val refreshToken: String,
-    val accessTokenExpireDate: String,
-    val refreshTokenExpireDate: String
-)
-
-@Serializable
 data class RegistrationError(
     val errorCode: Int,
     val errorMessage: String

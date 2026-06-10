@@ -28,6 +28,7 @@ import com.system.screen.registration.state.RegistrationScreenViewModel
 import com.system.screen.registration.state.ValidateOTPPage
 import com.system.screen.registration.components.OTPLoadingComponent
 import com.system.screen.registration.components.OtpValidateComponent
+import com.system.store.GlobalStoreViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -35,6 +36,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun OneTimePasswordPage(
     registrationScreenViewModel: RegistrationScreenViewModel = koinViewModel(),
+    globalStoreViewModel: GlobalStoreViewModel = koinViewModel(),
     onSuccess: ()-> Unit
 ) {
 
@@ -85,7 +87,9 @@ fun OneTimePasswordPage(
                         OTPLoadingComponent()
                     }
 
-                    ValidateOTPPage.Success -> {
+                    is ValidateOTPPage.Success -> {
+                        val auth = (otpValidationState as ValidateOTPPage.Success).auth
+                        globalStoreViewModel.setAuthInfo(auth)
                         onSuccess()
                     }
                 }

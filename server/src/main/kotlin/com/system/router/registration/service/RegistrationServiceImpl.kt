@@ -14,8 +14,8 @@ import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequest
 import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 import java.security.SecureRandom
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Date
 
 class RegistrationServiceImpl(
@@ -112,10 +112,14 @@ class RegistrationServiceImpl(
 
             logger.info("Generating JWT token")
 
-            val refreshTokenExpireAt = LocalDateTime.now().plusDays(30)
-            val refreshTokenExpireAtDate = Date.from(refreshTokenExpireAt.atZone(ZoneId.systemDefault()).toInstant()) // 30 days
-            val accessTokenExpireAt = LocalDateTime.now().plusHours(1)
-            val accessTokenExpireAtDate = Date.from(accessTokenExpireAt.atZone(ZoneId.systemDefault()).toInstant()) // 1 hour
+            val refreshTokenExpireAt = Instant.now()
+                .plus(30, ChronoUnit.DAYS)
+
+            val accessTokenExpireAt = Instant.now()
+                .plus(1, ChronoUnit.HOURS)
+
+            val refreshTokenExpireAtDate = Date.from(refreshTokenExpireAt)
+            val accessTokenExpireAtDate = Date.from(accessTokenExpireAt)
 
             val refreshToken = JWT.create()
                 .withAudience(appConfig.jwt.audience)

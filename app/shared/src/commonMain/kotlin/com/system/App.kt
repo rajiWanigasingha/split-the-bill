@@ -36,6 +36,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import com.system.di.clientModule
+import com.system.di.globalModule
+import com.system.di.platformModule
 import com.system.di.registrationScreenModule
 import com.system.navigation.screens.Screens
 import com.system.screen.groups.layoutComponent.GroupScreenTopAppBar
@@ -48,10 +50,12 @@ import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
 import com.system.screen.splits.screen.SplitIdScreen
 import com.system.screen.splits.screen.SplitScreen
 import com.system.screen.splits.states.SpiltItTabState
+import com.system.store.GlobalStoreViewModel
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.dsl.koinConfiguration
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
@@ -74,6 +78,8 @@ fun App() {
         KoinApplication(configuration = koinConfiguration {
             modules(
                 clientModule,
+                platformModule,
+                globalModule,
                 registrationScreenModule
             )
         }) {
@@ -86,6 +92,7 @@ fun App() {
             val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
             val focusManager = LocalFocusManager.current
             val snackBarHostState = remember { SnackbarHostState() }
+            val globalStoreViewModel = koinViewModel<GlobalStoreViewModel>()
 
             Scaffold(
                 modifier = Modifier
@@ -244,12 +251,36 @@ fun App() {
                         },
                         entryProvider = entryProvider {
                             entry<Screens.Home> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken == null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Registration)
+                                }
+
                                 HomePage()
                             }
                             entry<Screens.Groups> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken == null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Registration)
+                                }
+
                                 GroupScreen().NavigationBuilder { }
                             }
                             entry<Screens.Registration> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken != null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Home)
+                                }
+
                                 RegistrationScreen(
                                     snackBarHostState
                                 ).NavigationBuilder {
@@ -257,6 +288,14 @@ fun App() {
                                 }
                             }
                             entry<Screens.Splits> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken == null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Registration)
+                                }
+
                                 SplitScreen(
                                     actionExpand = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Information)) },
                                     reminderTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Reminder)) },
@@ -264,6 +303,14 @@ fun App() {
                                 ).NavigationBuilder {}
                             }
                             entry<Screens.SplitId> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken == null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Registration)
+                                }
+
                                 val splitTab = backStack.last() as? Screens.SplitId
                                 SplitIdScreen(
                                     splitTab?.tab ?: SpiltItTabState.Information

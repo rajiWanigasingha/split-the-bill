@@ -5,6 +5,7 @@ import com.system.screen.registration.dto.BasicInformationRegistrationValidation
 import com.system.screen.registration.dto.ContactInformationRegistrationDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
 import com.system.screen.registration.dto.RegistrationError
+import com.system.store.AuthInformationDTO
 
 sealed class BasicInformationPage {
     object Init: BasicInformationPage()
@@ -31,7 +32,7 @@ sealed class RegistrationPages {
 
 sealed class ValidateOTPPage {
     object Init: ValidateOTPPage()
-    object Success: ValidateOTPPage()
+    data class Success(val auth: AuthInformationDTO): ValidateOTPPage()
     data class Error(val error: String): ValidateOTPPage()
     object Loading: ValidateOTPPage()
 }

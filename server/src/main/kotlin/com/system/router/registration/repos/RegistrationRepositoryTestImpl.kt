@@ -4,6 +4,7 @@ import com.system.router.registration.errors.RegistrationErrors
 import com.system.router.registration.helpers.RegistrationResult
 import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDateTime
 
 class RegistrationRepositoryTestImpl : RegistrationRepository {
@@ -59,7 +60,7 @@ class RegistrationRepositoryTestImpl : RegistrationRepository {
         return false
     }
 
-    override suspend fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: LocalDateTime) : Boolean {
+    override suspend fun storeAccessToken(email: String, refreshToken: String ,refreshTokenExpireDate: Instant) : Boolean {
 
         logger.info("Try to store access token")
 

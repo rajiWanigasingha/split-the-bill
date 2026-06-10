@@ -8,10 +8,10 @@ import com.system.screen.registration.dto.BasicInformationRegistrationValidation
 import com.system.screen.registration.dto.ContactInformationRegistrationDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
 import com.system.screen.registration.dto.RegistrationError
-import com.system.screen.registration.dto.RegistrationJWT
 import com.system.screen.registration.dto.RegistrationNewUserDTO
 import com.system.screen.registration.dto.RegistrationValidationOTP
 import com.system.screen.registration.pages.ContactInformationPage
+import com.system.store.AuthInformationDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 
 class RegistrationScreenViewModel(
     private val client: Client
-): ViewModel() {
+) : ViewModel() {
     val basicInformationPageState: StateFlow<BasicInformationPage>
         field = MutableStateFlow<BasicInformationPage>(BasicInformationPage.Init)
     val contactInformationPageState: StateFlow<ContactInformationPage>
@@ -181,14 +181,26 @@ class RegistrationScreenViewModel(
             }
 
             if (response.status.value == 200) {
-                val jwtTokens = response.body<RegistrationJWT>()
-                println(jwtTokens.refreshToken)
-                println(jwtTokens.accessToken)
-                println(jwtTokens.refreshTokenExpireDate)
-                println(jwtTokens.accessTokenExpireDate)
-            }
+                val jwtTokens = response.body<AuthInformationDTO>()
+                validateOTPPageState.update {
+                    ValidateOTPPage.Success(
+                        AuthInformationDTO(
+                            accessToken = jwtTokens.accessToken,
+                            refreshToken = jwtTokens.refreshToken,
+                            accessTokenExpireDate = jwtTokens.accessTokenExpireDate,
+                            refreshTokenExpireDate = jwtTokens.refreshTokenExpireDate
+                        )
+                    )
+                }
+            } else {
+                runCatching {
+                    val error = response.body<RegistrationError>()
 
-            validateOTPPageState.update { ValidateOTPPage.Success }
+                    validateOTPPageState.update { ValidateOTPPage.Error(error.errorMessage) }
+                }.onFailure {
+                    validateOTPPageState.update { ValidateOTPPage.Error("Unknown Error. Please Try Again") }
+                }
+            }
         }
     }
 }
