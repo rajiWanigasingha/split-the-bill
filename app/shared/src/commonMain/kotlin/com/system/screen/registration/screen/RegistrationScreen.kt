@@ -5,6 +5,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSerializable
@@ -18,7 +19,9 @@ import com.system.screen.registration.pages.ContactInformationPage
 import com.system.screen.registration.pages.OneTimePasswordPage
 import kotlinx.serialization.Serializable
 
-class RegistrationScreen : RegularScreen() {
+class RegistrationScreen(
+    private val snackBarHostState : SnackbarHostState
+) : RegularScreen() {
 
     sealed class ScreenPages {
         @Serializable
@@ -70,7 +73,9 @@ class RegistrationScreen : RegularScreen() {
             },
             backStack = backStack,
             onBack = {
-                backStack.removeLastOrNull()
+                if (backStack.last() !is ScreenPages.OneTimePasswordPage) {
+                    backStack.removeLastOrNull()
+                }
             },
             entryProvider = entryProvider {
                 entry<ScreenPages.BasicInformationPage> {
@@ -82,6 +87,7 @@ class RegistrationScreen : RegularScreen() {
                 }
                 entry<ScreenPages.ContactInformationPage> {
                     ContactInformationPage(
+                        snackBarHostState = snackBarHostState,
                         onBack = {
                             backStack.removeLastOrNull()
                         },

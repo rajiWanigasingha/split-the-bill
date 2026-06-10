@@ -11,6 +11,7 @@ import com.system.router.registration.repos.RegistrationRepository
 import com.system.router.registration.helpers.RegistrationResult
 import com.system.router.registration.dtos.repoDTO.RegistrationTableDTO
 import com.system.router.registration.dtos.requestDTO.RegistrationNewUserRequestDTO
+import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.LocalDateTime
@@ -21,6 +22,8 @@ class RegistrationServiceImpl(
     private val appConfig: AppConfig,
     private val responseRepository: RegistrationRepository
 ) : RegistrationService {
+
+    private val logger = LoggerFactory.getLogger("RegistrationServiceImpl")
 
     override suspend fun createNewUser(registrationNewUserDTO: RegistrationNewUserRequestDTO): RegistrationResult<Unit> {
         val otp = generateOTP()
@@ -53,7 +56,6 @@ class RegistrationServiceImpl(
 
         return response
     }
-
     override suspend fun generateOTP(): Pair<String, String> {
         val random = SecureRandom()
         val digest = MessageDigest.getInstance("SHA-256")
@@ -67,7 +69,6 @@ class RegistrationServiceImpl(
 
         return Pair(hashOTP, otp)
     }
-
     override suspend fun sendOTP(userName: String, email: String, otp: String): Boolean {
         val resendKey = appConfig.resendApiKey
         var otpTemplate = appConfig.htmlTemplate
@@ -98,6 +99,8 @@ class RegistrationServiceImpl(
 
     override suspend fun validateOTP(email: String, otp: String) : RegistrationJWTToken? {
 
+        logger.info("Begin validation OTP")
+
         val digest = MessageDigest.getInstance("SHA-256")
 
         val hashOTP = digest.digest(otp.toByteArray())
@@ -106,6 +109,9 @@ class RegistrationServiceImpl(
         val validate = responseRepository.validateOTP(email ,hashOTP)
 
         if (validate) {
+
+            logger.info("Generating JWT token")
+
             val refreshTokenExpireAt = LocalDateTime.now().plusDays(30)
             val refreshTokenExpireAtDate = Date.from(refreshTokenExpireAt.atZone(ZoneId.systemDefault()).toInstant()) // 30 days
             val accessTokenExpireAt = LocalDateTime.now().plusHours(1)
@@ -130,21 +136,24 @@ class RegistrationServiceImpl(
             val hashRefreshToken = digest.digest(refreshToken.toByteArray())
                 .joinToString("") { "%02x".format(it) }
 
+            logger.info("Generated jwt token")
+
             val refreshTokenStored = responseRepository.storeAccessToken(
                 email = email,
                 refreshToken = hashRefreshToken,
                 refreshTokenExpireDate = refreshTokenExpireAt
             )
 
-            if (refreshTokenStored) {
-                return RegistrationJWTToken(
+            return if (refreshTokenStored) {
+                logger.info("Registration is successful")
+                RegistrationJWTToken(
                     accessToken = accessToken,
                     refreshToken = refreshToken,
                     accessTokenExpireDate = accessTokenExpireAt.toString(),
                     refreshTokenExpireDate = refreshTokenExpireAt.toString()
                 )
             } else {
-                return null
+                null
             }
         }
 

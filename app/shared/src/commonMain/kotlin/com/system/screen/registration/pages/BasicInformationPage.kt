@@ -37,10 +37,11 @@ import com.system.screen.registration.components.FirstNameComponent
 import com.system.screen.registration.components.LastNameComponent
 import com.system.screen.registration.components.UserNameComponent
 import com.system.theme.jetBrainsMonoFontFamily
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun BasicInformationPage(
-    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
+    registrationScreenViewModel: RegistrationScreenViewModel = koinViewModel(),
     nextPage: () -> Unit
 ) {
 

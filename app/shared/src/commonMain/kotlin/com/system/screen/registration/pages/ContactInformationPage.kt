@@ -15,17 +15,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +44,11 @@ import com.system.screen.registration.dto.ContactInformationRegistrationDTO
 import com.system.screen.registration.state.RegistrationScreenViewModel
 import com.system.screen.registration.components.EmailAddressComponent
 import com.system.screen.registration.components.PhoneNumberComponent
+import com.system.screen.registration.state.RegistrationPages
 import com.system.theme.jetBrainsMonoFontFamily
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.back
 import split_the_bill.app.shared.generated.resources.key
@@ -49,12 +56,14 @@ import split_the_bill.app.shared.generated.resources.key
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ContactInformationPage(
-    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
+    registrationScreenViewModel: RegistrationScreenViewModel = koinViewModel(),
+    snackBarHostState : SnackbarHostState,
     onBack: () -> Unit,
     onNextPage: () -> Unit
 ) {
 
     val contactInformationPageState by registrationScreenViewModel.contactInformationPageState.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -74,7 +83,6 @@ fun ContactInformationPage(
         }
         is ContactInformationPage.CollectedContactInformation -> {
             registrationScreenViewModel.createNewUser()
-            onNextPage()
         }
         is ContactInformationPage.CollectedValidationError -> {
             val errors = (contactInformationPageState as ContactInformationPage.CollectedValidationError).data
@@ -82,8 +90,19 @@ fun ContactInformationPage(
             phoneNumberError = errors.phoneNumber
         }
         is ContactInformationPage.SaveState -> {
-            registrationScreenViewModel.saveContactInformation()
+            onNextPage()
         }
+        is ContactInformationPage.ServerError -> {
+            val error = (contactInformationPageState as ContactInformationPage.ServerError).data
+            scope.launch {
+                snackBarHostState.showSnackbar(
+                    message = error.errorMessage,
+                    actionLabel = "Ok",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+        else -> {}
     }
 
     Scaffold {
@@ -99,111 +118,141 @@ fun ContactInformationPage(
                 },
             contentAlignment = Alignment.Center
         ) {
-            LazyColumn {
-
-                item {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "CONTACT INFORMATION",
-                            style = MaterialTheme.typography.headlineLargeEmphasized,
-                            fontFamily = jetBrainsMonoFontFamily(),
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "One more step to go. This need to be a phone number and email in use.",
-                            textAlign = TextAlign.Center
-                        )
+            if ((contactInformationPageState as? ContactInformationPage.Loading) != null) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularWavyProgressIndicator(
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.size(16.dp))
+                            Text(
+                                text = "SETTING UP",
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontFamily = jetBrainsMonoFontFamily(),
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            Text(
+                                text = "Validating registration request",
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
+            } else {
+                LazyColumn {
 
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-
-                item {
-                    EmailAddressComponent(
-                        email = email,
-                        onEmailChange = {
-                            email = it
-                        },
-                        onEmailClear = {
-                            email = ""
-                        },
-                        errorMessage = emailError
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                item {
-                    PhoneNumberComponent(
-                        selectedCountryCode = selectedCountryCode,
-                        onSelectedCountryCodeChange = { selectedCountryCode = it },
-                        onSelectedCountryCodeError = selectedCountryCodeError,
-                        phoneNumber = phoneNumber,
-                        onPhoneNumberChange = { phoneNumber = it },
-                        onPhoneNumberClear = { phoneNumber = "" },
-                        onPhoneNumberError = phoneNumberError
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                onBack()
-                            },
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.back),
-                                contentDescription = "Back",
-                                modifier = Modifier.size(20.dp)
+                            Text(
+                                text = "CONTACT INFORMATION",
+                                style = MaterialTheme.typography.headlineLargeEmphasized,
+                                fontFamily = jetBrainsMonoFontFamily(),
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.secondary
                             )
-                            Spacer(Modifier.size(8.dp))
-                            Text("Back")
+                            Text(
+                                text = "One more step to go. This need to be a phone number and email in use.",
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Button(
-                            onClick = {
-                                registrationScreenViewModel.setContactInformation(
-                                    info = ContactInformationRegistrationDTO(
-                                        email = email,
-                                        phoneNumber = phoneNumber,
-                                        countryCode = selectedCountryCode
-                                    )
-                                )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    item {
+                        EmailAddressComponent(
+                            email = email,
+                            onEmailChange = {
+                                email = it
                             },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
+                            onEmailClear = {
+                                email = ""
+                            },
+                            errorMessage = emailError
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    item {
+                        PhoneNumberComponent(
+                            selectedCountryCode = selectedCountryCode,
+                            onSelectedCountryCodeChange = { selectedCountryCode = it },
+                            onSelectedCountryCodeError = selectedCountryCodeError,
+                            phoneNumber = phoneNumber,
+                            onPhoneNumberChange = { phoneNumber = it },
+                            onPhoneNumberClear = { phoneNumber = "" },
+                            onPhoneNumberError = phoneNumberError
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Send verification OTP")
-                            Spacer(Modifier.size(8.dp))
-                            Icon(
-                                painter = painterResource(Res.drawable.key),
-                                contentDescription = "key",
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Button(
+                                onClick = {
+                                    registrationScreenViewModel.resetContactInformation()
+                                    onBack()
+                                },
+                                shape = RoundedCornerShape(4.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ),
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.back),
+                                    contentDescription = "Back",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(Modifier.size(8.dp))
+                                Text("Back")
+                            }
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            Button(
+                                onClick = {
+                                    registrationScreenViewModel.setContactInformation(
+                                        info = ContactInformationRegistrationDTO(
+                                            email = email,
+                                            phoneNumber = phoneNumber,
+                                            countryCode = selectedCountryCode
+                                        )
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(4.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ),
+                            ) {
+                                Text("Send verification OTP")
+                                Spacer(Modifier.size(8.dp))
+                                Icon(
+                                    painter = painterResource(Res.drawable.key),
+                                    contentDescription = "key",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }

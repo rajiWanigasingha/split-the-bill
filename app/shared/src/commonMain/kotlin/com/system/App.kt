@@ -18,10 +18,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -32,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
+import com.system.di.clientModule
+import com.system.di.registrationScreenModule
 import com.system.navigation.screens.Screens
 import com.system.screen.groups.layoutComponent.GroupScreenTopAppBar
 import com.system.screen.groups.screen.GroupScreen
@@ -46,6 +51,8 @@ import com.system.screen.splits.states.SpiltItTabState
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.KoinApplication
+import org.koin.dsl.koinConfiguration
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
 import split_the_bill.app.shared.generated.resources.all_splits
@@ -63,192 +70,208 @@ fun App() {
         typography = appTypography(),
         motionScheme = MotionScheme.expressive()
     ) {
-        val backStack: MutableList<Screens> = rememberSerializable(
-            serializer = SnapshotStateListSerializer()
-        ) {
-            mutableStateListOf(Screens.Registration)
-        }
 
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-        val focusManager = LocalFocusManager.current
+        KoinApplication(configuration = koinConfiguration {
+            modules(
+                clientModule,
+                registrationScreenModule
+            )
+        }) {
+            val backStack: MutableList<Screens> = rememberSerializable(
+                serializer = SnapshotStateListSerializer()
+            ) {
+                mutableStateListOf(Screens.Registration)
+            }
 
-        Scaffold(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
+            val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+            val focusManager = LocalFocusManager.current
+            val snackBarHostState = remember { SnackbarHostState() }
+
+            Scaffold(
+                modifier = Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    },
+                topBar = {
+                    when (backStack.last()) {
+                        Screens.Home -> {
+                            HomeScreenTopAppBar(scrollBehavior)
+                        }
+
+                        Screens.Groups -> {
+                            GroupScreenTopAppBar(scrollBehavior)
+                        }
+
+                        Screens.Splits -> {
+                            SplitScreenTopAppBar(scrollBehavior)
+                        }
+
+                        is Screens.SplitId -> {
+                            SplitIdScreenTopAppBar()
+                        }
+
+                        else -> {}
+                    }
                 },
-            topBar = {
-                when (backStack.last()) {
-                    Screens.Home -> {
-                        HomeScreenTopAppBar(scrollBehavior)
-                    }
-
-                    Screens.Groups -> {
-                        GroupScreenTopAppBar(scrollBehavior)
-                    }
-
-                    Screens.Splits -> {
-                        SplitScreenTopAppBar(scrollBehavior)
-                    }
-
-                    is Screens.SplitId -> {
-                        SplitIdScreenTopAppBar()
-                    }
-
-                    else -> {}
-                }
-            },
-            bottomBar = {
-                if (backStack.last() !is Screens.Registration) {
-                    BottomAppBar {
-                        NavigationBarItem(
-                            selected = backStack.last() is Screens.Home,
-                            onClick = {
-                                backStack.add(Screens.Home)
-                            },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.home),
-                                    contentDescription = "home",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            label = {
-                                Text("Home")
-                            }
-                        )
-                        NavigationBarItem(
-                            selected = backStack.last() is Screens.Splits,
-                            onClick = {
-                                backStack.add(Screens.Splits)
-                            },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.all_splits),
-                                    contentDescription = "all_split",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            label = {
-                                Text("Splits")
-                            }
-                        )
-                        NavigationBarItem(
-                            selected = false,
-                            onClick = {},
-                            icon = {
-                                FloatingActionButton(
-                                    onClick = {},
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
+                bottomBar = {
+                    if (backStack.last() !is Screens.Registration) {
+                        BottomAppBar {
+                            NavigationBarItem(
+                                selected = backStack.last() is Screens.Home,
+                                onClick = {
+                                    backStack.add(Screens.Home)
+                                },
+                                icon = {
                                     Icon(
-                                        painter = painterResource(Res.drawable.add),
-                                        contentDescription = "add",
+                                        painter = painterResource(Res.drawable.home),
+                                        contentDescription = "home",
                                         modifier = Modifier.size(20.dp)
                                     )
+                                },
+                                label = {
+                                    Text("Home")
+                                }
+                            )
+                            NavigationBarItem(
+                                selected = backStack.last() is Screens.Splits,
+                                onClick = {
+                                    backStack.add(Screens.Splits)
+                                },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.all_splits),
+                                        contentDescription = "all_split",
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                label = {
+                                    Text("Splits")
+                                }
+                            )
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = {},
+                                icon = {
+                                    FloatingActionButton(
+                                        onClick = {},
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.add),
+                                            contentDescription = "add",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            )
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = {},
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.stats),
+                                        contentDescription = "statics",
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                label = {
+                                    Text("Statics")
+                                }
+                            )
+                            NavigationBarItem(
+                                selected = backStack.last() is Screens.Groups,
+                                onClick = {
+                                    backStack.add(Screens.Groups)
+                                },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.group),
+                                        contentDescription = "group",
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                label = {
+                                    Text("Groups")
+                                }
+                            )
+                        }
+                    }
+                },
+                snackbarHost = {
+                    SnackbarHost(hostState = snackBarHostState)
+                },
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding)
+                ) {
+                    NavDisplay(
+                        transitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(600)
+                            ) togetherWith slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(600)
+                            )
+                        },
+                        popTransitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(600)
+                            ) togetherWith slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(600)
+                            )
+                        },
+                        predictivePopTransitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(600)
+                            ) togetherWith slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(600)
+                            )
+                        },
+                        backStack = backStack,
+                        onBack = {
+                            backStack.removeLastOrNull()
+                        },
+                        entryProvider = entryProvider {
+                            entry<Screens.Home> {
+                                HomePage()
+                            }
+                            entry<Screens.Groups> {
+                                GroupScreen().NavigationBuilder { }
+                            }
+                            entry<Screens.Registration> {
+                                RegistrationScreen(
+                                    snackBarHostState
+                                ).NavigationBuilder {
+                                    backStack.add(Screens.Home)
                                 }
                             }
-                        )
-                        NavigationBarItem(
-                            selected = false,
-                            onClick = {},
-                            icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.stats),
-                                    contentDescription = "statics",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            label = {
-                                Text("Statics")
+                            entry<Screens.Splits> {
+                                SplitScreen(
+                                    actionExpand = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Information)) },
+                                    reminderTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Reminder)) },
+                                    splitAmongTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.SpiltAmong)) }
+                                ).NavigationBuilder {}
                             }
-                        )
-                        NavigationBarItem(
-                            selected = backStack.last() is Screens.Groups,
-                            onClick = {
-                                backStack.add(Screens.Groups)
-                            },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(Res.drawable.group),
-                                    contentDescription = "group",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            label = {
-                                Text("Groups")
+                            entry<Screens.SplitId> {
+                                val splitTab = backStack.last() as? Screens.SplitId
+                                SplitIdScreen(
+                                    splitTab?.tab ?: SpiltItTabState.Information
+                                ).NavigationBuilder { }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
-            }
-        ) { contentPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding)
-            ) {
-                NavDisplay(
-                    transitionSpec = {
-                        slideInHorizontally(
-                            initialOffsetX = { fullWidth -> fullWidth },
-                            animationSpec = tween(600)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(600)
-                        )
-                    },
-                    popTransitionSpec = {
-                        slideInHorizontally(
-                            initialOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(600)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> fullWidth },
-                            animationSpec = tween(600)
-                        )
-                    },
-                    predictivePopTransitionSpec = {
-                        slideInHorizontally(
-                            initialOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(600)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> fullWidth },
-                            animationSpec = tween(600)
-                        )
-                    },
-                    backStack = backStack,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                    entryProvider = entryProvider {
-                        entry<Screens.Home> {
-                            HomePage()
-                        }
-                        entry<Screens.Groups> {
-                            GroupScreen().NavigationBuilder { }
-                        }
-                        entry<Screens.Registration> {
-                            RegistrationScreen().NavigationBuilder {
-                                backStack.add(Screens.Home)
-                            }
-                        }
-                        entry<Screens.Splits> {
-                            SplitScreen(
-                                actionExpand = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Information)) },
-                                reminderTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.Reminder)) },
-                                splitAmongTab = { backStack.add(Screens.SplitId(tab = SpiltItTabState.SpiltAmong)) }
-                            ).NavigationBuilder {}
-                        }
-                        entry<Screens.SplitId> {
-                            val splitTab = backStack.last() as? Screens.SplitId
-                            SplitIdScreen(splitTab?.tab ?: SpiltItTabState.Information).NavigationBuilder {  }
-                        }
-                    }
-                )
             }
         }
     }

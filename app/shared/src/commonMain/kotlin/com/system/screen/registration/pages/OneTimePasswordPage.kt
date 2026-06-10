@@ -29,11 +29,12 @@ import com.system.screen.registration.state.ValidateOTPPage
 import com.system.screen.registration.components.OTPLoadingComponent
 import com.system.screen.registration.components.OtpValidateComponent
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
 fun OneTimePasswordPage(
-    registrationScreenViewModel: RegistrationScreenViewModel = viewModel { RegistrationScreenViewModel() },
+    registrationScreenViewModel: RegistrationScreenViewModel = koinViewModel(),
     onSuccess: ()-> Unit
 ) {
 

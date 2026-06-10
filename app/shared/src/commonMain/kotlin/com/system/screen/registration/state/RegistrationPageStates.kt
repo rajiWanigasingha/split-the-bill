@@ -4,6 +4,7 @@ import com.system.screen.registration.dto.BasicInformationRegistrationDTO
 import com.system.screen.registration.dto.BasicInformationRegistrationValidationErrorDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationDTO
 import com.system.screen.registration.dto.ContactInformationRegistrationValidationErrorDTO
+import com.system.screen.registration.dto.RegistrationError
 
 sealed class BasicInformationPage {
     object Init: BasicInformationPage()
@@ -17,6 +18,9 @@ sealed class ContactInformationPage {
     data class CollectedContactInformation(val data: ContactInformationRegistrationDTO): ContactInformationPage()
     data class CollectedValidationError(val data: ContactInformationRegistrationValidationErrorDTO): ContactInformationPage()
     data class SaveState(val data: ContactInformationRegistrationDTO): ContactInformationPage()
+    data class ServerError(val data: RegistrationError) : ContactInformationPage()
+
+    data object Loading : ContactInformationPage()
 }
 
 sealed class RegistrationPages {

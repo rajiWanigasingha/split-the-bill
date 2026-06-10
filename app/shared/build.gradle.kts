@@ -69,6 +69,10 @@ kotlin {
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.jetbrains.lifecycle.viewmodelNavigation3)
             implementation(libs.jetbrains.material3.adaptiveNavigation3)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.navigation3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

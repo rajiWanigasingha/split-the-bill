@@ -51,3 +51,9 @@ data class RegistrationJWT(
     val accessTokenExpireDate: String,
     val refreshTokenExpireDate: String
 )
+
+@Serializable
+data class RegistrationError(
+    val errorCode: Int,
+    val errorMessage: String
+)

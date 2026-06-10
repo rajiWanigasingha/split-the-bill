@@ -70,9 +70,12 @@ fun Route.registrationRoute() {
     }
 
     post("/registration/otp") {
+        logger.info("Received OTP")
+
         val otpValidationObject =  runCatching {
             call.receive<OTPValidationRequestDTO>()
         }.getOrElse {
+            logger.info("Received Invalid OTP object")
             call.respond(
                 HttpStatusCode.BadRequest,
                 RegistrationError(
