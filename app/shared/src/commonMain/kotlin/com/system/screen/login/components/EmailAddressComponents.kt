@@ -47,11 +47,6 @@ fun EmailAddressComponents(
             },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         singleLine = true,
-        textStyle = TextStyle(
-            textAlign = TextAlign.Center,
-            letterSpacing = 8.sp,
-            fontSize = 20.sp
-        ),
         leadingIcon = {
             Icon(
                 painter = painterResource(Res.drawable.email),

@@ -40,6 +40,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import com.system.di.clientModule
 import com.system.di.globalModule
+import com.system.di.loginScreenModule
 import com.system.di.platformModule
 import com.system.di.registrationScreenModule
 import com.system.navigation.screens.Screens
@@ -85,7 +86,8 @@ fun App() {
                 clientModule,
                 platformModule,
                 globalModule,
-                registrationScreenModule
+                registrationScreenModule,
+                loginScreenModule
             )
         }) {
             val backStack: MutableList<Screens> = rememberSerializable(

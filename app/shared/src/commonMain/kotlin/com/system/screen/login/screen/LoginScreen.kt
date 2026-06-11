@@ -120,7 +120,9 @@ class LoginScreen : RegularScreen() {
                 },
                 entryProvider = entryProvider {
                     entry<ScreenPages.EmailPage> {
-                        EmailAddressPage()
+                        EmailAddressPage {
+                            backStack.add(ScreenPages.OPTPage)
+                        }
                     }
 
                     entry<ScreenPages.OPTPage> {

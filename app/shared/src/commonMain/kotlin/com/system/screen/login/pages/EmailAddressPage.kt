@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,18 +27,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.system.screen.login.components.EmailAddressComponents
+import com.system.screen.login.state.LoginViewModel
+import com.system.screen.login.state.statesDTO.EmailPageStates
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.back
 import split_the_bill.app.shared.generated.resources.backward
+import kotlin.math.log
 
 @Composable
-fun EmailAddressPage() {
-
-    val focusManager = LocalFocusManager.current
-
+fun EmailAddressPage(
+    loginViewModel: LoginViewModel = koinViewModel(),
+    sendOTP: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
+    val emailPageState = loginViewModel.emailPageState.collectAsState()
+
+    when (emailPageState.value) {
+        EmailPageStates.Init -> {}
+        is EmailPageStates.Error -> {}
+        is EmailPageStates.SaveEmailState -> {
+            sendOTP()
+        }
+    }
 
     LazyColumn {
         item {
@@ -87,11 +101,12 @@ fun EmailAddressPage() {
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
+                        loginViewModel.setEmailAddress(email)
                     },
                     shape = RoundedCornerShape(4.dp),
                 ) {
-                    Spacer(Modifier.size(8.dp))
                     Text("Send OTP")
+                    Spacer(Modifier.size(8.dp))
                     Icon(
                         painter = painterResource(Res.drawable.backward),
                         contentDescription = "close",
