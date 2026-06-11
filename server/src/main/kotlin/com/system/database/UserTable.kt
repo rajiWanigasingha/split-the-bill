@@ -1,8 +1,13 @@
 package com.system.database
+
+// Create UserTableDTO data class file and refactor this into it. rename User to UserTableDTO
 data class User(val id: Int, var firstName: String, var lastName: String,var userName: String, var email: String, var password: String, var phoneNumber: String)
 
+// Put these in UserTableError file
 class UserCreatingException(val id: Int, message: String) : Exception(message)
 class UserNotFoundException(val id: Int, message: String) : Exception(message)
+
+// Keep this in here
 class UserTable {
     private val users = mutableListOf<User>()
 
@@ -33,9 +38,5 @@ class UserTable {
         }
         users.removeIf { it.id == id }
     }
-
-}
-fun main(){
-    val db = UserTable()
 
 }

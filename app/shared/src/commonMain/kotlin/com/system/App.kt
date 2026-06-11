@@ -47,7 +47,7 @@ import com.system.screen.groups.layoutComponent.GroupScreenTopAppBar
 import com.system.screen.groups.screen.GroupScreen
 import com.system.screen.home.HomePage
 import com.system.screen.home.HomeScreenTopAppBar
-import com.system.screen.login.LoginScreen
+import com.system.screen.login.screen.LoginScreen
 import com.system.screen.registration.screen.RegistrationScreen
 import com.system.screen.splits.layoutComponent.SplitIdScreenTopAppBar
 import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
@@ -275,7 +275,7 @@ fun App() {
 
                                 if (accessToken == null) {
                                     backStack.removeLastOrNull()
-                                    backStack.add(Screens.Registration)
+                                    backStack.add(Screens.Login)
                                 }
 
                                 HomePage()
