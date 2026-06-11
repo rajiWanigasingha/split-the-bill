@@ -44,9 +44,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.system.store.GlobalStoreViewModel
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
 import split_the_bill.app.shared.generated.resources.all_splits
@@ -61,6 +63,7 @@ import split_the_bill.app.shared.generated.resources.reminder
 @Composable
 fun HomeScreenTopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
     val collapsedFraction = scrollBehavior.state.collapsedFraction
+    val globalStoreViewModel = koinViewModel<GlobalStoreViewModel>()
 
     MediumTopAppBar(
         scrollBehavior = scrollBehavior,
@@ -106,7 +109,10 @@ fun HomeScreenTopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
                     .size(40.dp)
                     .clip(CircleShape)
                     .wrapContentHeight()
-                    .clickable {},
+                    .clickable {
+                        println("Login Out")
+                        globalStoreViewModel.logout()
+                    },
                 contentScale = ContentScale.Crop
             )
         }

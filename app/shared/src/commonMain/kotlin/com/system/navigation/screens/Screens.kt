@@ -14,9 +14,11 @@ sealed class Screens : NavKey {
     @Serializable data class SplitId(val tab: SpiltItTabState = SpiltItTabState.Information) : Screens()
 
 
-    @Serializable data object Remind : Screens()
+    @Serializable data object Static : Screens()
 
     @Serializable data object Groups : Screens()
 
     @Serializable data object Registration : Screens()
+
+    @Serializable data object Login: Screens()
 }

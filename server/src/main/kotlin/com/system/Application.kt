@@ -4,6 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.system.loadEnv.AppConfig
 import com.system.loadEnv.Config
 import com.system.loadEnv.JWT
+import com.system.router.login.paths.loginRoute
 import com.system.router.registration.di.registrationModule
 import com.system.router.registration.paths.registrationRoute
 import io.ktor.serialization.kotlinx.json.json
@@ -80,5 +81,6 @@ fun Application.module() {
 
     routing {
         registrationRoute()
+        loginRoute()
     }
 }

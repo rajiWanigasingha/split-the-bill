@@ -23,6 +23,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
@@ -44,12 +47,14 @@ import com.system.screen.groups.layoutComponent.GroupScreenTopAppBar
 import com.system.screen.groups.screen.GroupScreen
 import com.system.screen.home.HomePage
 import com.system.screen.home.HomeScreenTopAppBar
+import com.system.screen.login.LoginScreen
 import com.system.screen.registration.screen.RegistrationScreen
 import com.system.screen.splits.layoutComponent.SplitIdScreenTopAppBar
 import com.system.screen.splits.layoutComponent.SplitScreenTopAppBar
 import com.system.screen.splits.screen.SplitIdScreen
 import com.system.screen.splits.screen.SplitScreen
 import com.system.screen.splits.states.SpiltItTabState
+import com.system.store.GlobalAuthState
 import com.system.store.GlobalStoreViewModel
 import com.system.theme.appTypography
 import com.system.theme.splitItColorSchema
@@ -93,6 +98,16 @@ fun App() {
             val focusManager = LocalFocusManager.current
             val snackBarHostState = remember { SnackbarHostState() }
             val globalStoreViewModel = koinViewModel<GlobalStoreViewModel>()
+            val globalStoreAuthState by globalStoreViewModel.globalAuthState.collectAsState()
+
+            when (globalStoreAuthState) {
+                GlobalAuthState.Login -> {}
+                GlobalAuthState.Logout -> {
+                    backStack.clear()
+                    backStack.add(Screens.Login)
+                }
+            }
+
 
             Scaffold(
                 modifier = Modifier
@@ -124,87 +139,91 @@ fun App() {
                     }
                 },
                 bottomBar = {
-                    if (backStack.last() !is Screens.Registration) {
-                        BottomAppBar {
-                            NavigationBarItem(
-                                selected = backStack.last() is Screens.Home,
-                                onClick = {
-                                    backStack.add(Screens.Home)
-                                },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.home),
-                                        contentDescription = "home",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                label = {
-                                    Text("Home")
-                                }
-                            )
-                            NavigationBarItem(
-                                selected = backStack.last() is Screens.Splits,
-                                onClick = {
-                                    backStack.add(Screens.Splits)
-                                },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.all_splits),
-                                        contentDescription = "all_split",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                label = {
-                                    Text("Splits")
-                                }
-                            )
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = {},
-                                icon = {
-                                    FloatingActionButton(
-                                        onClick = {},
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    ) {
+                    when (backStack.last()) {
+                        Screens.Login,
+                        Screens.Registration -> {}
+                        else -> {
+                            BottomAppBar {
+                                NavigationBarItem(
+                                    selected = backStack.last() is Screens.Home,
+                                    onClick = {
+                                        backStack.add(Screens.Home)
+                                    },
+                                    icon = {
                                         Icon(
-                                            painter = painterResource(Res.drawable.add),
-                                            contentDescription = "add",
+                                            painter = painterResource(Res.drawable.home),
+                                            contentDescription = "home",
                                             modifier = Modifier.size(20.dp)
                                         )
+                                    },
+                                    label = {
+                                        Text("Home")
                                     }
-                                }
-                            )
-                            NavigationBarItem(
-                                selected = false,
-                                onClick = {},
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.stats),
-                                        contentDescription = "statics",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                label = {
-                                    Text("Statics")
-                                }
-                            )
-                            NavigationBarItem(
-                                selected = backStack.last() is Screens.Groups,
-                                onClick = {
-                                    backStack.add(Screens.Groups)
-                                },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.group),
-                                        contentDescription = "group",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                label = {
-                                    Text("Groups")
-                                }
-                            )
+                                )
+                                NavigationBarItem(
+                                    selected = backStack.last() is Screens.Splits,
+                                    onClick = {
+                                        backStack.add(Screens.Splits)
+                                    },
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.all_splits),
+                                            contentDescription = "all_split",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text("Splits")
+                                    }
+                                )
+                                NavigationBarItem(
+                                    selected = false,
+                                    onClick = {},
+                                    icon = {
+                                        FloatingActionButton(
+                                            onClick = {},
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.add),
+                                                contentDescription = "add",
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                )
+                                NavigationBarItem(
+                                    selected = false,
+                                    onClick = {},
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.stats),
+                                            contentDescription = "statics",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text("Statics")
+                                    }
+                                )
+                                NavigationBarItem(
+                                    selected = backStack.last() is Screens.Groups,
+                                    onClick = {
+                                        backStack.add(Screens.Groups)
+                                    },
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.group),
+                                            contentDescription = "group",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text("Groups")
+                                    }
+                                )
+                            }
                         }
                     }
                 },
@@ -267,7 +286,7 @@ fun App() {
 
                                 if (accessToken == null) {
                                     backStack.removeLastOrNull()
-                                    backStack.add(Screens.Registration)
+                                    backStack.add(Screens.Login)
                                 }
 
                                 GroupScreen().NavigationBuilder { }
@@ -287,13 +306,27 @@ fun App() {
                                     backStack.add(Screens.Home)
                                 }
                             }
+                            entry<Screens.Login> {
+
+                                val accessToken = globalStoreViewModel.getAccessToken()
+
+                                if (accessToken != null) {
+                                    backStack.removeLastOrNull()
+                                    backStack.add(Screens.Home)
+                                }
+
+                                LoginScreen().NavigationBuilder {
+                                    backStack.add(Screens.Registration)
+                                }
+
+                            }
                             entry<Screens.Splits> {
 
                                 val accessToken = globalStoreViewModel.getAccessToken()
 
                                 if (accessToken == null) {
                                     backStack.removeLastOrNull()
-                                    backStack.add(Screens.Registration)
+                                    backStack.add(Screens.Login)
                                 }
 
                                 SplitScreen(
@@ -308,7 +341,7 @@ fun App() {
 
                                 if (accessToken == null) {
                                     backStack.removeLastOrNull()
-                                    backStack.add(Screens.Registration)
+                                    backStack.add(Screens.Login)
                                 }
 
                                 val splitTab = backStack.last() as? Screens.SplitId

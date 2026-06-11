@@ -3,6 +3,9 @@ package com.system.store
 import androidx.lifecycle.ViewModel
 import eu.anifantakis.lib.ksafe.KSafe
 import eu.anifantakis.lib.ksafe.invoke
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -11,20 +14,28 @@ class GlobalStoreViewModel(
     private val vault: KSafe
 ) : ViewModel() {
 
-    private var authData by vault(AuthInformationDTO())
+    val globalAuthState: StateFlow<GlobalAuthState>
+        field = MutableStateFlow<GlobalAuthState>(GlobalAuthState.Logout)
+    private var authData: AuthInformationDTO? by vault(null)
 
     fun setAuthInfo(auth: AuthInformationDTO) {
         authData = auth
+        globalAuthState.update { GlobalAuthState.Login }
     }
 
     fun getAccessToken(): String? {
 
-        val expired = authData.accessTokenExpireDate ?: return null
+        val expired = authData?.accessTokenExpireDate ?: return null
 
         if (Instant.parse(expired) < Clock.System.now()) {
             return null
         }
 
-        return authData.accessToken
+        return authData!!.accessToken
+    }
+
+    fun logout() {
+        authData = null
+        globalAuthState.update { GlobalAuthState.Logout }
     }
 }

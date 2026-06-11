@@ -44,9 +44,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.system.screen.splits.components.Split
+import com.system.store.GlobalStoreViewModel
 import com.system.theme.jetBrainsMonoFontFamily
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
 import split_the_bill.app.shared.generated.resources.Res
 import split_the_bill.app.shared.generated.resources.add
 import split_the_bill.app.shared.generated.resources.all_splits
@@ -114,7 +116,6 @@ val recentSplitsExamples = listOf(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomePage() {
-
     Box(
         modifier = Modifier
             .fillMaxSize()
